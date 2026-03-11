@@ -11,6 +11,8 @@ exports.handler = async (event) => {
     };
   }
 
+  const MOPING_PASSWORD = process.env.MOPING_PASSWORD;
+
   let body;
   try {
     body = JSON.parse(event.body);
@@ -18,7 +20,14 @@ exports.handler = async (event) => {
     return { statusCode: 400, body: JSON.stringify({ error: 'Invalid request body' }) };
   }
 
-  const { imageBase64, mediaType, style } = body;
+  const { imageBase64, mediaType, style, password } = body;
+
+  if (MOPING_PASSWORD && password !== MOPING_PASSWORD) {
+    return {
+      statusCode: 401,
+      body: JSON.stringify({ error: 'Incorrect password.' })
+    };
+  }
 
   if (!imageBase64 || !mediaType) {
     return { statusCode: 400, body: JSON.stringify({ error: 'Missing imageBase64 or mediaType' }) };
@@ -54,8 +63,8 @@ The JSON must have exactly these fields:
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model: 'claude-haiku-4-5',
-        max_tokens: 4000,
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1500,
         system: systemPrompt,
         messages: [{
           role: 'user',
@@ -79,7 +88,6 @@ The JSON must have exactly these fields:
     const raw = data.content?.find(b => b.type === 'text')?.text || '';
     const clean = raw.replace(/```json\n?|```/g, '').trim();
 
-    // Validate it parses before sending back
     JSON.parse(clean);
 
     return {
