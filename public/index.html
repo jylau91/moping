@@ -268,6 +268,23 @@ nav {
 .notes-input::placeholder { color:var(--text-mute); }
 .notes-input:focus { outline:none; border-color:var(--gold); box-shadow: 0 0 0 3px rgba(176,125,42,0.1); }
 
+.pw-row {
+  display:flex; gap:.4rem; align-items:stretch;
+}
+.pw-input { flex:1; margin-bottom:0; }
+.pw-toggle {
+  background:var(--bg-card); border:1px solid var(--border);
+  border-radius:6px; padding:.4rem .7rem;
+  cursor:pointer; font-size:.8rem; transition:all .15s;
+  flex-shrink:0;
+}
+.pw-toggle:hover { border-color:var(--gold); }
+.pw-error {
+  font-size:.7rem; color:var(--vermillion);
+  margin-top:.35rem; min-height:.9rem;
+  font-family:'Noto Sans SC',sans-serif;
+}
+
 /* Analyse button */
 .analyse-btn {
   width:100%; padding:.9rem;
@@ -747,6 +764,15 @@ nav {
       <textarea class="notes-input" id="notesInput" placeholder="e.g. Third attempt at 永字 · focusing on 撇 stroke today…" rows="2"></textarea>
     </div>
 
+    <div class="pw-wrap" id="pwWrap" style="display:none; width:100%;">
+      <label class="field-label">Password</label>
+      <div class="pw-row">
+        <input class="notes-input pw-input" type="password" id="pwInput" placeholder="Enter access password…" autocomplete="current-password">
+        <button class="pw-toggle" type="button" onclick="togglePw()" id="pwToggle">👁</button>
+      </div>
+      <p class="pw-error" id="pwError"></p>
+    </div>
+
     <button class="analyse-btn" id="analyseBtn" onclick="doAnalyse()">✦ Analyse ✦</button>
 
     <input type="file" id="fileInput" accept="image/*">
@@ -889,14 +915,30 @@ function loadFile(file) {
   imgMediaType = file.type || 'image/jpeg';
   const r = new FileReader();
   r.onload = e => {
-    imgBase64 = e.target.result.split(',')[1];
-    document.getElementById('previewImg').src = e.target.result;
-    zone.style.display = 'none';
-    document.getElementById('previewWrap').style.display = 'block';
-    document.getElementById('styleSel').style.display = 'block';
-    document.getElementById('notesWrap').style.display = 'block';
-    document.getElementById('analyseBtn').style.display = 'block';
-    setState('empty');
+    const img = new Image();
+    img.onload = () => {
+      // Resize: cap longest side at 1000px
+      const MAX = 1000;
+      let w = img.width, h = img.height;
+      if (w > MAX || h > MAX) {
+        if (w >= h) { h = Math.round(h * MAX / w); w = MAX; }
+        else        { w = Math.round(w * MAX / h); h = MAX; }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      const resized = canvas.toDataURL(imgMediaType, 0.85);
+      imgBase64 = resized.split(',')[1];
+      document.getElementById('previewImg').src = resized;
+      zone.style.display = 'none';
+      document.getElementById('previewWrap').style.display = 'block';
+      document.getElementById('styleSel').style.display = 'block';
+      document.getElementById('notesWrap').style.display = 'block';
+      document.getElementById('pwWrap').style.display = 'block';
+      document.getElementById('analyseBtn').style.display = 'block';
+      setState('empty');
+    };
+    img.src = e.target.result;
   };
   r.readAsDataURL(file);
 }
@@ -907,6 +949,8 @@ function resetUpload() {
   document.getElementById('previewWrap').style.display = 'none';
   document.getElementById('styleSel').style.display = 'none';
   document.getElementById('notesWrap').style.display = 'none';
+  document.getElementById('pwWrap').style.display = 'none';
+  document.getElementById('pwError').textContent = '';
   document.getElementById('analyseBtn').style.display = 'none';
   setState('empty');
 }
@@ -935,6 +979,10 @@ function setState(s) {
 async function doAnalyse() {
   if (!imgBase64) return;
   const btn = document.getElementById('analyseBtn');
+  const pwError = document.getElementById('pwError');
+  const password = document.getElementById('pwInput').value;
+  pwError.textContent = '';
+
   btn.disabled = true; btn.textContent = 'Reading strokes…';
   setState('loading');
 
@@ -945,11 +993,20 @@ async function doAnalyse() {
       body: JSON.stringify({
         imageBase64: imgBase64,
         mediaType: imgMediaType,
-        style: selectedStyle
+        style: selectedStyle,
+        password
       })
     });
 
     const data = await res.json();
+
+    if (res.status === 401) {
+      pwError.textContent = '⚠ ' + (data.error || 'Incorrect password.');
+      setState('empty');
+      btn.disabled = false; btn.textContent = '✦ Analyse ✦';
+      return;
+    }
+
     if (!res.ok) throw new Error(data.error || `Server error ${res.status}`);
 
     renderResult(data);
@@ -964,6 +1021,13 @@ async function doAnalyse() {
   } finally {
     btn.disabled = false; btn.textContent = '✦ Analyse ✦';
   }
+}
+
+function togglePw() {
+  const input = document.getElementById('pwInput');
+  const btn = document.getElementById('pwToggle');
+  if (input.type === 'password') { input.type = 'text'; btn.textContent = '🙈'; }
+  else { input.type = 'password'; btn.textContent = '👁'; }
 }
 
 // ══════════════════════════════
