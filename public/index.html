@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>墨評 Mòpíng · Calligraphy Analyser</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;500&family=Cinzel+Decorative:wght@400;700&family=Crimson+Pro:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:        #120d08;
+  --ink-mid:    #1e1610;
+  --ink-light:  #2a1e14;
+  --rice:       #f2ead8;
+  --rice-dim:   #c8bc9e;
+  --vermillion: #b83025;
+  --verm-glow:  #e04030;
+  --gold:       #c49a1a;
+  --gold-light: #e0b835;
+  --gold-dim:   #8a6a10;
+  --stone:      #6a5e50;
+  --stone-lt:   #9a8e80;
+  --jade:       #3a7a5a;
+  --jade-lt:    #4a9a70;
+  --seal-red:   rgba(184,48,37,0.18);
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--ink);
+  color: var(--rice);
+  font-family: 'Crimson Pro', Georgia, serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Paper texture */
+body::after {
+  content:'';
+  position:fixed; inset:0;
+  background-image:
+    radial-gradient(ellipse 120% 80% at 10% 20%, rgba(196,154,26,0.04) 0%, transparent 60%),
+    radial-gradient(ellipse 80% 120% at 90% 80%, rgba(184,48,37,0.04) 0%, transparent 60%);
+  pointer-events:none; z-index:0;
+}
+
+/* ═══════════════════ NAV ═══════════════════ */
+nav {
+  position:relative; z-index:100;
+  display:flex; align-items:center;
+  padding: 0 2.5rem;
+  height: 68px;
+  border-bottom: 1px solid rgba(196,154,26,0.2);
+  background: rgba(18,13,8,0.9);
+  backdrop-filter: blur(8px);
+}
+
+.nav-brand {
+  display:flex; align-items:center; gap:1rem;
+  flex:1;
+}
+
+.brand-seal {
+  width:44px; height:44px;
+  border:2px solid var(--vermillion);
+  border-radius:3px;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Noto Serif SC',serif;
+  font-size:1.5rem; font-weight:900;
+  color:var(--vermillion);
+  text-shadow:0 0 12px rgba(184,48,37,0.5);
+  flex-shrink:0;
+  animation: sealPulse 3s ease-in-out infinite;
+}
+
+@keyframes sealPulse {
+  0%,100%{box-shadow:0 0 0 0 rgba(184,48,37,0.3)}
+  50%{box-shadow:0 0 0 6px rgba(184,48,37,0)}
+}
+
+.brand-text { display:flex; flex-direction:column; }
+.brand-en {
+  font-family:'Cinzel Decorative',serif;
+  font-size:.95rem; letter-spacing:.08em;
+  color:var(--gold-light);
+  line-height:1.1;
+}
+.brand-sub {
+  font-size:.65rem; letter-spacing:.18em;
+  color:var(--stone-lt); text-transform:uppercase;
+}
+
+.nav-tabs {
+  display:flex; gap:.25rem;
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(196,154,26,0.15);
+  border-radius:3px;
+  padding:.25rem;
+}
+
+.nav-tab {
+  padding:.4rem 1.2rem;
+  font-family:'Crimson Pro',serif;
+  font-size:.85rem; letter-spacing:.06em;
+  color:var(--stone-lt);
+  background:transparent; border:none;
+  cursor:pointer; border-radius:2px;
+  transition:all .2s;
+}
+.nav-tab:hover { color:var(--rice-dim); }
+.nav-tab.active {
+  background:rgba(196,154,26,0.15);
+  color:var(--gold-light);
+}
+
+.nav-count {
+  margin-left:.4rem;
+  background:var(--vermillion);
+  color:var(--rice); font-size:.6rem;
+  padding:.1rem .4rem; border-radius:10px;
+  font-family:'Noto Sans SC',sans-serif;
+  display:none;
+}
+.nav-count.visible { display:inline; }
+
+/* ═══════════════════ PAGES ═══════════════════ */
+.page { display:none; position:relative; z-index:10; }
+.page.active { display:block; }
+
+/* ═══════════════════ ANALYSE PAGE ═══════════════════ */
+#page-analyse {
+  display:none;
+  grid-template-columns: minmax(340px,420px) 1fr;
+  min-height: calc(100vh - 68px);
+}
+#page-analyse.active { display:grid; }
+
+/* --- Left column --- */
+.col-upload {
+  border-right:1px solid rgba(196,154,26,0.15);
+  display:flex; flex-direction:column;
+  align-items:center;
+  padding:2rem 1.8rem;
+  gap:1.2rem;
+}
+
+.upload-zone {
+  width:100%; aspect-ratio:3/4;
+  border:2px dashed rgba(196,154,26,0.3);
+  border-radius:4px;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer;
+  transition:all .3s;
+  position:relative; overflow:hidden;
+  background:rgba(242,234,216,0.02);
+}
+.upload-zone:hover,.upload-zone.drag-over {
+  border-color:var(--gold);
+  background:rgba(196,154,26,0.05);
+}
+.upload-zone.drag-over { border-style:solid; transform:scale(1.01); }
+
+.upload-placeholder {
+  display:flex; flex-direction:column; align-items:center;
+  gap:1.2rem; padding:2rem; text-align:center;
+}
+.upload-glyph {
+  font-family:'Noto Serif SC',serif;
+  font-size:5rem; color:rgba(196,154,26,0.25);
+  line-height:1; transition:all .3s;
+}
+.upload-zone:hover .upload-glyph { color:rgba(196,154,26,0.5); transform:scale(1.06); }
+.upload-label-main {
+  font-family:'Cinzel Decorative',serif;
+  font-size:.85rem; letter-spacing:.06em; color:var(--rice-dim);
+}
+.upload-label-sub { font-size:.7rem; color:var(--stone); letter-spacing:.12em; }
+
+.btn-primary {
+  padding:.55rem 1.6rem;
+  background:var(--vermillion); color:var(--rice);
+  border:none; border-radius:2px;
+  font-family:'Cinzel Decorative',serif; font-size:.75rem;
+  letter-spacing:.08em; cursor:pointer;
+  transition:all .2s;
+}
+.btn-primary:hover {
+  background:var(--verm-glow);
+  transform:translateY(-1px);
+  box-shadow:0 4px 18px rgba(184,48,37,0.4);
+}
+.btn-primary:disabled { opacity:.4; cursor:not-allowed; transform:none; }
+
+.preview-wrap { width:100%; position:relative; display:none; }
+.preview-wrap img { width:100%; border-radius:3px; border:1px solid rgba(196,154,26,0.25); display:block; }
+.preview-actions {
+  position:absolute; top:.5rem; right:.5rem;
+  display:flex; gap:.4rem;
+}
+.btn-ghost {
+  background:rgba(18,13,8,0.85); border:1px solid rgba(196,154,26,0.35);
+  color:var(--rice-dim); padding:.25rem .7rem; font-size:.65rem;
+  letter-spacing:.1em; cursor:pointer; border-radius:2px;
+  transition:all .2s; font-family:'Noto Sans SC',sans-serif;
+}
+.btn-ghost:hover { border-color:var(--gold); color:var(--gold-light); }
+
+/* Style selector */
+.style-sel { width:100%; display:none; }
+.field-label {
+  font-size:.65rem; color:var(--stone-lt);
+  letter-spacing:.18em; text-transform:uppercase;
+  display:block; margin-bottom:.5rem;
+}
+.style-chips { display:flex; gap:.4rem; flex-wrap:wrap; }
+.chip {
+  padding:.28rem .75rem; border:1px solid rgba(196,154,26,0.25);
+  border-radius:2px; font-size:.72rem; cursor:pointer;
+  transition:all .2s; color:var(--stone-lt);
+  background:transparent; font-family:'Noto Sans SC',sans-serif;
+}
+.chip:hover,.chip.on { border-color:var(--gold); color:var(--gold-light); background:rgba(196,154,26,0.1); }
+
+/* Notes input */
+.notes-wrap { width:100%; display:none; }
+.notes-input {
+  width:100%; background:rgba(255,255,255,0.03);
+  border:1px solid rgba(196,154,26,0.2); border-radius:2px;
+  color:var(--rice-dim); font-family:'Crimson Pro',serif; font-size:.85rem;
+  padding:.6rem .8rem; resize:vertical; min-height:60px;
+  letter-spacing:.02em;
+  transition:border-color .2s;
+}
+.notes-input::placeholder { color:var(--stone); }
+.notes-input:focus { outline:none; border-color:rgba(196,154,26,0.5); }
+
+/* Analyse button */
+.analyse-btn {
+  width:100%; padding:.9rem;
+  background:transparent; border:1px solid var(--gold);
+  color:var(--gold-light); border-radius:2px;
+  font-family:'Cinzel Decorative',serif; font-size:.9rem;
+  letter-spacing:.12em; cursor:pointer;
+  transition:all .3s; display:none;
+  position:relative; overflow:hidden;
+}
+.analyse-btn::before {
+  content:''; position:absolute; inset:0;
+  background:var(--gold); transform:translateX(-100%);
+  transition:transform .35s; z-index:-1;
+}
+.analyse-btn:hover { color:var(--ink); }
+.analyse-btn:hover::before { transform:translateX(0); }
+.analyse-btn:disabled { opacity:.45; cursor:not-allowed; }
+.analyse-btn:disabled::before { display:none; }
+
+#fileInput { display:none; }
+
+/* --- Right column: results --- */
+.col-results {
+  overflow-y:auto;
+  max-height:calc(100vh - 68px);
+  padding:2.5rem 2.8rem;
+}
+.col-results::-webkit-scrollbar { width:3px; }
+.col-results::-webkit-scrollbar-thumb { background:rgba(196,154,26,0.25); border-radius:2px; }
+
+/* Empty */
+.results-empty {
+  height:100%; min-height:400px;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  gap:1.5rem; opacity:.35;
+}
+.empty-glyph {
+  font-family:'Noto Serif SC',serif; font-size:9rem;
+  color:var(--stone); line-height:1;
+}
+.empty-text { font-size:1rem; color:var(--stone-lt); letter-spacing:.08em; text-align:center; }
+
+/* Loading */
+.results-loading {
+  height:100%; min-height:400px;
+  display:none; flex-direction:column;
+  align-items:center; justify-content:center;
+  gap:2rem;
+}
+.spinner {
+  width:64px; height:64px; position:relative;
+}
+.spinner::before,.spinner::after {
+  content:''; position:absolute; border-radius:50%;
+  border:2px solid transparent;
+  animation:spin 1.4s linear infinite;
+}
+.spinner::before { inset:0; border-top-color:var(--vermillion); border-right-color:var(--vermillion); }
+.spinner::after  { inset:10px; border-top-color:var(--gold); animation-direction:reverse; animation-duration:.9s; }
+@keyframes spin { to { transform:rotate(360deg); } }
+.loading-glyph {
+  font-family:'Noto Serif SC',serif; font-size:1.8rem;
+  color:var(--rice-dim);
+  animation:breathe 2s ease-in-out infinite;
+}
+@keyframes breathe { 0%,100%{opacity:.3} 50%{opacity:1} }
+.loading-msg { font-size:.75rem; color:var(--stone-lt); letter-spacing:.2em; }
+
+/* Error */
+.results-error {
+  height:100%; min-height:400px;
+  display:none; flex-direction:column;
+  align-items:center; justify-content:center;
+  gap:1.2rem; text-align:center;
+}
+.error-icon { font-size:2.5rem; }
+.error-text { font-size:.85rem; color:var(--stone-lt); max-width:320px; line-height:1.7; }
+
+/* Results content */
+.results-body { display:none; }
+
+/* Score hero */
+.score-hero {
+  display:flex; gap:2rem; align-items:flex-start;
+  padding-bottom:2rem; margin-bottom:2rem;
+  border-bottom:1px solid rgba(196,154,26,0.15);
+  animation: riseIn .6s ease-out both;
+}
+@keyframes riseIn { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:none} }
+
+.score-dial {
+  width:100px; height:100px;
+  border-radius:50%;
+  border:2px solid var(--gold-dim);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  flex-shrink:0;
+  position:relative;
+  background: conic-gradient(
+    var(--gold-dim) 0%,
+    transparent 0%
+  );
+}
+.score-dial::after {
+  content:''; position:absolute; inset:6px;
+  border-radius:50%; border:1px solid rgba(196,154,26,0.2);
+}
+.score-val {
+  font-family:'Cinzel Decorative',serif; font-size:2.2rem;
+  color:var(--gold-light); line-height:1; z-index:1;
+}
+.score-ten { font-size:.65rem; color:var(--stone-lt); z-index:1; letter-spacing:.1em; }
+
+.score-info { flex:1; }
+.score-grade {
+  font-family:'Noto Serif SC',serif; font-size:2rem;
+  color:var(--vermillion); margin-bottom:.4rem;
+  text-shadow:0 0 20px rgba(184,48,37,0.3);
+}
+.score-style {
+  display:inline-block;
+  border:1px solid rgba(196,154,26,0.35);
+  color:var(--gold-light); padding:.18rem .65rem;
+  font-size:.68rem; letter-spacing:.15em; border-radius:2px;
+  margin-bottom:.7rem; font-family:'Noto Sans SC',sans-serif;
+}
+.score-summary { font-size:.9rem; color:var(--rice-dim); line-height:1.75; }
+
+/* Section heading */
+.sec-head {
+  font-family:'Cinzel Decorative',serif;
+  font-size:.68rem; letter-spacing:.22em;
+  color:var(--stone-lt); text-transform:uppercase;
+  margin-bottom:1rem;
+  display:flex; align-items:center; gap:.8rem;
+}
+.sec-head::after { content:''; flex:1; height:1px; background:rgba(196,154,26,0.15); }
+
+/* Metrics */
+.metrics-grid {
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:.7rem; margin-bottom:2rem;
+  animation:riseIn .6s ease-out .12s both;
+}
+.metric-card {
+  border:1px solid rgba(196,154,26,0.12);
+  border-radius:3px; padding:.8rem 1rem;
+  background:rgba(242,234,216,0.02);
+  transition:border-color .2s;
+}
+.metric-card:hover { border-color:rgba(196,154,26,0.35); }
+.metric-row { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:.45rem; }
+.metric-name-cn { font-family:'Noto Serif SC',serif; font-size:.85rem; color:var(--rice-dim); }
+.metric-name-en { font-size:.65rem; color:var(--stone); margin-left:.3rem; }
+.metric-val { font-family:'Cinzel Decorative',serif; font-size:.95rem; color:var(--gold-light); }
+.metric-bar { height:2px; background:rgba(196,154,26,0.12); border-radius:1px; margin-bottom:.45rem; }
+.metric-fill { height:100%; border-radius:1px; background:linear-gradient(90deg,var(--gold-dim),var(--verm-glow)); width:0; transition:width 1.1s ease-out; }
+.metric-note { font-size:.72rem; color:var(--stone-lt); line-height:1.5; font-style:italic; }
+
+/* Improvements */
+.impr-list { display:flex; flex-direction:column; gap:.75rem; margin-bottom:2rem; animation:riseIn .6s ease-out .24s both; }
+.impr-card {
+  display:flex; gap:.9rem; padding:.9rem 1rem;
+  border:1px solid rgba(184,48,37,0.2);
+  border-left:3px solid var(--vermillion);
+  border-radius:0 3px 3px 0;
+  background:rgba(184,48,37,0.03);
+  transition:all .2s;
+}
+.impr-card:hover { background:rgba(184,48,37,0.06); border-color:rgba(184,48,37,0.45); border-left-color:var(--verm-glow); }
+.impr-num { font-family:'Cinzel Decorative',serif; font-size:1.1rem; color:var(--vermillion); flex-shrink:0; line-height:1.1; }
+.impr-title { font-size:.85rem; color:var(--rice-dim); margin-bottom:.25rem; font-weight:400; }
+.impr-desc { font-size:.77rem; color:var(--stone-lt); line-height:1.65; font-style:italic; }
+
+/* Strengths */
+.str-list { display:flex; flex-wrap:wrap; gap:.45rem; margin-bottom:2rem; animation:riseIn .6s ease-out .36s both; }
+.str-tag {
+  padding:.3rem .85rem;
+  background:rgba(58,122,90,0.12); border:1px solid rgba(58,122,90,0.35);
+  color:var(--jade-lt); border-radius:2px;
+  font-size:.72rem; letter-spacing:.05em;
+  font-family:'Noto Sans SC',sans-serif;
+}
+
+/* Intermediate tips */
+.tips-box {
+  padding:1.2rem; border:1px solid rgba(196,154,26,0.18);
+  border-radius:3px; background:rgba(196,154,26,0.04);
+  margin-bottom:2rem;
+  animation:riseIn .6s ease-out .48s both;
+}
+.tips-inner { font-size:.82rem; color:var(--stone-lt); line-height:1.75; }
+.tips-char { font-family:'Noto Serif SC',serif; font-size:2.8rem; color:rgba(196,154,26,0.2); float:right; margin:0 0 .5rem .8rem; line-height:1; }
+
+/* Study references */
+.refs-list { display:flex; flex-direction:column; gap:.5rem; margin-bottom:2rem; animation:riseIn .6s ease-out .6s both; }
+.ref-item {
+  display:flex; align-items:center; gap:.8rem; padding:.6rem .8rem;
+  border:1px solid rgba(196,154,26,0.12); border-radius:2px;
+  background:rgba(242,234,216,0.02); transition:all .2s;
+}
+.ref-item:hover { border-color:rgba(196,154,26,0.3); background:rgba(196,154,26,0.04); }
+.ref-char { font-family:'Noto Serif SC',serif; font-size:1.4rem; color:var(--gold-dim); width:32px; text-align:center; flex-shrink:0; }
+.ref-body { flex:1; }
+.ref-name { font-size:.8rem; color:var(--rice-dim); margin-bottom:.1rem; }
+.ref-desc { font-size:.7rem; color:var(--stone); font-style:italic; }
+.ref-badge {
+  font-size:.6rem; padding:.15rem .5rem;
+  background:rgba(196,154,26,0.1); border:1px solid rgba(196,154,26,0.25);
+  color:var(--gold-dim); border-radius:2px; letter-spacing:.08em;
+  font-family:'Noto Sans SC',sans-serif; white-space:nowrap;
+}
+
+/* ═══════════════════ HISTORY PAGE ═══════════════════ */
+#page-history { padding:2.5rem 3rem; min-height:calc(100vh - 68px); }
+
+.history-head {
+  display:flex; justify-content:space-between; align-items:flex-end;
+  margin-bottom:2rem;
+  padding-bottom:1.2rem;
+  border-bottom:1px solid rgba(196,154,26,0.15);
+}
+.history-title { font-family:'Cinzel Decorative',serif; font-size:1.3rem; color:var(--gold-light); }
+.history-subtitle { font-size:.8rem; color:var(--stone-lt); margin-top:.3rem; letter-spacing:.05em; }
+
+/* Progress chart */
+.progress-chart-wrap {
+  margin-bottom:2.5rem;
+  background:rgba(242,234,216,0.02);
+  border:1px solid rgba(196,154,26,0.15);
+  border-radius:4px;
+  padding:1.5rem;
+}
+.chart-title { font-family:'Cinzel Decorative',serif; font-size:.75rem; color:var(--stone-lt); letter-spacing:.15em; margin-bottom:1.2rem; }
+.chart-area { position:relative; height:120px; display:flex; align-items:flex-end; gap:.4rem; }
+.chart-bar-wrap { flex:1; display:flex; flex-direction:column; align-items:center; gap:.4rem; }
+.chart-bar { width:100%; border-radius:2px 2px 0 0; background:linear-gradient(180deg,var(--gold),var(--vermillion)); transition:height 1s ease-out; min-height:4px; position:relative; }
+.chart-bar:hover .chart-tooltip { display:block; }
+.chart-tooltip {
+  display:none; position:absolute; bottom:105%; left:50%; transform:translateX(-50%);
+  background:rgba(18,13,8,.95); border:1px solid rgba(196,154,26,.4);
+  padding:.35rem .6rem; border-radius:2px; white-space:nowrap;
+  font-size:.7rem; color:var(--rice-dim); z-index:10;
+}
+.chart-label { font-size:.6rem; color:var(--stone); text-align:center; font-family:'Noto Sans SC',sans-serif; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; }
+.chart-score-label { font-size:.65rem; color:var(--gold-dim); font-family:'Cinzel Decorative',serif; }
+
+/* History empty */
+.history-empty {
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  min-height:300px; gap:1.5rem; opacity:.4;
+}
+.history-empty-char { font-family:'Noto Serif SC',serif; font-size:6rem; color:var(--stone); line-height:1; }
+.history-empty-text { font-size:.9rem; color:var(--stone-lt); text-align:center; letter-spacing:.05em; }
+
+/* History grid */
+.history-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:1.2rem; }
+
+.history-card {
+  border:1px solid rgba(196,154,26,0.15);
+  border-radius:4px; overflow:hidden;
+  background:rgba(242,234,216,0.02);
+  transition:all .25s;
+  cursor:pointer;
+  animation:riseIn .4s ease-out both;
+}
+.history-card:hover { border-color:rgba(196,154,26,0.4); transform:translateY(-2px); box-shadow:0 8px 30px rgba(0,0,0,0.3); }
+
+.history-card-img {
+  width:100%; height:160px;
+  object-fit:contain; object-position:center;
+  background:rgba(255,255,255,0.02);
+  display:block;
+}
+.history-card-body { padding:.9rem 1rem; }
+.history-card-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:.5rem; }
+.history-card-date { font-size:.68rem; color:var(--stone); letter-spacing:.08em; font-family:'Noto Sans SC',sans-serif; }
+.history-card-score { font-family:'Cinzel Decorative',serif; font-size:1.2rem; color:var(--gold-light); }
+.history-card-grade { font-family:'Noto Serif SC',serif; font-size:1.1rem; color:var(--vermillion); margin-bottom:.35rem; }
+.history-card-style {
+  display:inline-block;
+  border:1px solid rgba(196,154,26,0.2); color:var(--gold-dim);
+  padding:.12rem .45rem; font-size:.62rem; letter-spacing:.12em;
+  border-radius:2px; margin-bottom:.5rem;
+  font-family:'Noto Sans SC',sans-serif;
+}
+.history-card-summary { font-size:.75rem; color:var(--stone-lt); line-height:1.55; font-style:italic; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
+.history-card-actions { display:flex; gap:.5rem; margin-top:.7rem; padding-top:.7rem; border-top:1px solid rgba(196,154,26,0.1); }
+.history-card-notes { font-size:.7rem; color:var(--jade-lt); font-style:italic; margin-top:.3rem; }
+
+.btn-clear-hist {
+  background:transparent; border:1px solid rgba(184,48,37,0.3);
+  color:rgba(184,48,37,0.6); padding:.35rem .9rem;
+  font-size:.68rem; letter-spacing:.1em; cursor:pointer; border-radius:2px;
+  transition:all .2s; font-family:'Noto Sans SC',sans-serif;
+}
+.btn-clear-hist:hover { border-color:var(--vermillion); color:var(--vermillion); }
+
+/* Comparison mini-metric bars in history */
+.mini-metrics { display:flex; gap:.3rem; margin-top:.6rem; }
+.mini-m { flex:1; }
+.mini-m-label { font-size:.55rem; color:var(--stone); text-align:center; margin-bottom:.2rem; font-family:'Noto Sans SC',sans-serif; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.mini-m-bar { height:3px; background:rgba(196,154,26,0.1); border-radius:1px; overflow:hidden; }
+.mini-m-fill { height:100%; background:linear-gradient(90deg,var(--gold-dim),var(--verm-glow)); transition:width 1s ease-out; width:0; }
+
+/* Scroll */
+#page-history::-webkit-scrollbar { width:3px; }
+
+/* Decorative side text */
+.side-deco {
+  position:fixed; right:.8rem; top:50%;
+  transform:translateY(-50%);
+  writing-mode:vertical-rl;
+  font-family:'Noto Serif SC',serif; font-size:.65rem;
+  color:rgba(196,154,26,0.1); letter-spacing:.35em;
+  pointer-events:none; z-index:5;
+  user-select:none;
+}
+
+/* Modal */
+.modal-overlay {
+  display:none; position:fixed; inset:0; z-index:200;
+  background:rgba(18,13,8,0.92); backdrop-filter:blur(4px);
+  align-items:center; justify-content:center; padding:2rem;
+}
+.modal-overlay.open { display:flex; }
+.modal-box {
+  background:var(--ink-light); border:1px solid rgba(196,154,26,0.3);
+  border-radius:4px; padding:2rem; max-width:680px; width:100%;
+  max-height:80vh; overflow-y:auto;
+  position:relative;
+}
+.modal-close {
+  position:absolute; top:.8rem; right:.8rem;
+  background:transparent; border:1px solid rgba(196,154,26,0.2);
+  color:var(--stone-lt); width:28px; height:28px; font-size:.8rem;
+  cursor:pointer; border-radius:2px; transition:all .2s;
+  display:flex; align-items:center; justify-content:center;
+}
+.modal-close:hover { border-color:var(--gold); color:var(--gold); }
+.modal-img { width:100%; border-radius:3px; margin-bottom:1.5rem; border:1px solid rgba(196,154,26,0.2); }
+.modal-score-row { display:flex; align-items:center; gap:1.5rem; margin-bottom:1.5rem; }
+.modal-score-big { font-family:'Cinzel Decorative',serif; font-size:2.5rem; color:var(--gold-light); }
+.modal-grade { font-family:'Noto Serif SC',serif; font-size:1.5rem; color:var(--vermillion); }
+
+@media(max-width:768px){
+  #page-analyse.active { display:flex; flex-direction:column; }
+  .col-results { max-height:none; }
+  .metrics-grid { grid-template-columns:1fr; }
+  #page-history { padding:1.5rem; }
+  .history-grid { grid-template-columns:1fr; }
+  nav { padding:0 1.2rem; }
+  .nav-tabs { display:flex; }
+  .brand-en { font-size:.8rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="side-deco">筆墨丹青 · 書法藝術 · 揮毫潑墨 · 中鋒側鋒</div>
+
+<!-- ═══ NAV ═══ -->
+<nav>
+  <div class="nav-brand">
+    <div class="brand-seal">墨</div>
+    <div class="brand-text">
+      <span class="brand-en">Mòpíng</span>
+      <span class="brand-sub">Calligraphy Analyser · Intermediate</span>
+    </div>
+  </div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPage('analyse')">✦ Analyse</button>
+    <button class="nav-tab" onclick="showPage('history')">
+      History
+      <span class="nav-count" id="histCount">0</span>
+    </button>
+  </div>
+</nav>
+
+<!-- ═══ PAGE: ANALYSE ═══ -->
+<div class="page active" id="page-analyse">
+
+  <!-- Left: upload -->
+  <div class="col-upload">
+
+    <div class="upload-zone" id="uploadZone">
+      <div class="upload-placeholder" id="upPlaceholder">
+        <div class="upload-glyph">書</div>
+        <div>
+          <p class="upload-label-main">Upload Calligraphy</p>
+          <p class="upload-label-sub" style="margin-top:.4rem">Drag & drop or click to browse</p>
+          <p class="upload-label-sub" style="margin-top:.2rem">JPG · PNG · WEBP</p>
+        </div>
+        <button class="btn-primary" onclick="event.stopPropagation();document.getElementById('fileInput').click()">Select Image</button>
+      </div>
+    </div>
+
+    <div class="preview-wrap" id="previewWrap">
+      <img id="previewImg" src="" alt="Preview">
+      <div class="preview-actions">
+        <button class="btn-ghost" onclick="resetUpload()">✕ Clear</button>
+      </div>
+    </div>
+
+    <div class="style-sel" id="styleSel">
+      <label class="field-label">Calligraphy Style</label>
+      <div class="style-chips">
+        <button class="chip on" data-style="auto">Auto Detect</button>
+        <button class="chip" data-style="kaishu">楷書 Kaishu</button>
+        <button class="chip" data-style="xingshu">行書 Xingshu</button>
+        <button class="chip" data-style="caoshu">草書 Caoshu</button>
+        <button class="chip" data-style="zhuanshu">篆書 Zhuanshu</button>
+        <button class="chip" data-style="lishu">隸書 Lishu</button>
+      </div>
+    </div>
+
+    <div class="notes-wrap" id="notesWrap">
+      <label class="field-label">Session Notes (optional)</label>
+      <textarea class="notes-input" id="notesInput" placeholder="e.g. Third attempt at 永字 · focusing on 撇 stroke today…" rows="2"></textarea>
+    </div>
+
+    <button class="analyse-btn" id="analyseBtn" onclick="doAnalyse()">✦ Analyse ✦</button>
+
+    <input type="file" id="fileInput" accept="image/*">
+  </div>
+
+  <!-- Right: results -->
+  <div class="col-results" id="colResults">
+
+    <div class="results-empty" id="resEmpty">
+      <div class="empty-glyph">評</div>
+      <p class="empty-text">Upload a calligraphy image<br>to receive your assessment</p>
+    </div>
+
+    <div class="results-loading" id="resLoading">
+      <div class="spinner"></div>
+      <div class="loading-glyph">評…</div>
+      <p class="loading-msg">Reading brush strokes</p>
+    </div>
+
+    <div class="results-error" id="resError">
+      <div class="error-icon">⊘</div>
+      <p class="error-text" id="errorTxt">Unable to analyse image. Please ensure it clearly shows calligraphy work.</p>
+      <button class="btn-ghost" onclick="setState('empty')">Try Again</button>
+    </div>
+
+    <div class="results-body" id="resBody">
+
+      <div class="score-hero">
+        <div class="score-dial" id="scoreDial">
+          <span class="score-val" id="scoreVal">—</span>
+          <span class="score-ten">/ 10</span>
+        </div>
+        <div class="score-info">
+          <div class="score-grade" id="scoreGrade">—</div>
+          <span class="score-style" id="scoreStyle">—</span>
+          <p class="score-summary" id="scoreSummary">—</p>
+        </div>
+      </div>
+
+      <p class="sec-head">Stroke Analysis 筆畫分析</p>
+      <div class="metrics-grid" id="metricsGrid"></div>
+
+      <p class="sec-head">Areas for Improvement 改進建議</p>
+      <div class="impr-list" id="imprList"></div>
+
+      <p class="sec-head">Identified Strengths 優點</p>
+      <div class="str-list" id="strList"></div>
+
+      <p class="sec-head">Intermediate Focus 中級學習重點</p>
+      <div class="tips-box" id="tipsBox"></div>
+
+      <p class="sec-head">Recommended Study 推薦參考</p>
+      <div class="refs-list" id="refsList"></div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PAGE: HISTORY ═══ -->
+<div class="page" id="page-history">
+  <div class="history-head">
+    <div>
+      <div class="history-title">Practice History 練習記錄</div>
+      <div class="history-subtitle" id="histSubtitle">Track your progress over time</div>
+    </div>
+    <button class="btn-clear-hist" id="clearHistBtn" onclick="clearHistory()" style="display:none">✕ Clear All</button>
+  </div>
+
+  <div id="histEmpty" class="history-empty">
+    <div class="history-empty-char">記</div>
+    <p class="history-empty-text">No sessions yet.<br>Analyse some calligraphy to begin tracking progress.</p>
+  </div>
+
+  <div id="progressChartWrap" class="progress-chart-wrap" style="display:none">
+    <div class="chart-title">Score Progression</div>
+    <div class="chart-area" id="progressChart"></div>
+  </div>
+
+  <div class="history-grid" id="histGrid"></div>
+</div>
+
+<!-- ═══ MODAL ═══ -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal-box" id="modalBox">
+    <button class="modal-close" onclick="document.getElementById('modalOverlay').classList.remove('open')">✕</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════
+// STATE
+// ══════════════════════════════
+let imgBase64 = null;
+let imgMediaType = 'image/jpeg';
+let selectedStyle = 'auto';
+let history = JSON.parse(localStorage.getItem('mopingHistory') || '[]');
+
+// ══════════════════════════════
+// NAVIGATION
+// ══════════════════════════════
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  event.currentTarget.classList.add('active');
+  if (id === 'history') renderHistory();
+}
+
+// ══════════════════════════════
+// UPLOAD
+// ══════════════════════════════
+const zone = document.getElementById('uploadZone');
+const fileInput = document.getElementById('fileInput');
+
+zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+zone.addEventListener('drop', e => {
+  e.preventDefault(); zone.classList.remove('drag-over');
+  const f = e.dataTransfer.files[0];
+  if (f && f.type.startsWith('image/')) loadFile(f);
+});
+zone.addEventListener('click', e => { if (e.target.tagName !== 'BUTTON') fileInput.click(); });
+fileInput.addEventListener('change', e => { if (e.target.files[0]) loadFile(e.target.files[0]); });
+
+function loadFile(file) {
+  imgMediaType = file.type || 'image/jpeg';
+  const r = new FileReader();
+  r.onload = e => {
+    imgBase64 = e.target.result.split(',')[1];
+    document.getElementById('previewImg').src = e.target.result;
+    zone.style.display = 'none';
+    document.getElementById('previewWrap').style.display = 'block';
+    document.getElementById('styleSel').style.display = 'block';
+    document.getElementById('notesWrap').style.display = 'block';
+    document.getElementById('analyseBtn').style.display = 'block';
+    setState('empty');
+  };
+  r.readAsDataURL(file);
+}
+
+function resetUpload() {
+  imgBase64 = null; fileInput.value = '';
+  zone.style.display = 'flex';
+  document.getElementById('previewWrap').style.display = 'none';
+  document.getElementById('styleSel').style.display = 'none';
+  document.getElementById('notesWrap').style.display = 'none';
+  document.getElementById('analyseBtn').style.display = 'none';
+  setState('empty');
+}
+
+document.querySelectorAll('.chip').forEach(c => {
+  c.addEventListener('click', () => {
+    document.querySelectorAll('.chip').forEach(x => x.classList.remove('on'));
+    c.classList.add('on');
+    selectedStyle = c.dataset.style;
+  });
+});
+
+// ══════════════════════════════
+// RESULT STATES
+// ══════════════════════════════
+function setState(s) {
+  document.getElementById('resEmpty').style.display   = s==='empty'   ? 'flex'  : 'none';
+  document.getElementById('resLoading').style.display = s==='loading' ? 'flex'  : 'none';
+  document.getElementById('resError').style.display   = s==='error'   ? 'flex'  : 'none';
+  document.getElementById('resBody').style.display    = s==='results' ? 'block' : 'none';
+}
+
+// ══════════════════════════════
+// ANALYSE
+// ══════════════════════════════
+async function doAnalyse() {
+  if (!imgBase64) return;
+  const btn = document.getElementById('analyseBtn');
+  btn.disabled = true; btn.textContent = 'Reading strokes…';
+  setState('loading');
+
+  try {
+    const res = await fetch('/api/analyse', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        imageBase64: imgBase64,
+        mediaType: imgMediaType,
+        style: selectedStyle
+      })
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || `Server error ${res.status}`);
+
+    renderResult(data);
+    saveToHistory(data);
+    setState('results');
+
+  } catch(err) {
+    console.error(err);
+    document.getElementById('errorTxt').textContent =
+      err.message.includes('parse') ? 'Could not parse analysis. Please try again.' : `Error: ${err.message}`;
+    setState('error');
+  } finally {
+    btn.disabled = false; btn.textContent = '✦ Analyse ✦';
+  }
+}
+
+// ══════════════════════════════
+// RENDER RESULT
+// ══════════════════════════════
+function renderResult(r) {
+  // Score hero
+  document.getElementById('scoreVal').textContent = r.overallScore;
+  document.getElementById('scoreGrade').textContent = r.grade;
+  document.getElementById('scoreStyle').textContent = r.detectedStyle;
+  document.getElementById('scoreSummary').textContent = r.summary;
+
+  const scoreEl = document.getElementById('scoreVal');
+  scoreEl.style.color = r.overallScore >= 8 ? '#e0b835' : r.overallScore >= 6 ? '#c49a1a' : '#b83025';
+
+  // Metrics
+  const mg = document.getElementById('metricsGrid');
+  mg.innerHTML = '';
+  r.metrics.forEach(m => {
+    const pct = (m.score/10)*100;
+    mg.innerHTML += `
+      <div class="metric-card">
+        <div class="metric-row">
+          <span class="metric-name-cn">${m.cn}<span class="metric-name-en">${m.name}</span></span>
+          <span class="metric-val">${m.score}/10</span>
+        </div>
+        <div class="metric-bar"><div class="metric-fill" data-w="${pct}%"></div></div>
+        <p class="metric-note">${m.note}</p>
+      </div>`;
+  });
+  requestAnimationFrame(()=>{ setTimeout(()=>{ document.querySelectorAll('.metric-fill').forEach(el=>el.style.width=el.dataset.w); },80); });
+
+  // Improvements
+  const il = document.getElementById('imprList');
+  il.innerHTML = '';
+  r.improvements.forEach((imp,i) => {
+    il.innerHTML += `
+      <div class="impr-card">
+        <div class="impr-num">${i+1}</div>
+        <div>
+          <div class="impr-title">${imp.title}</div>
+          <div class="impr-desc">${imp.desc}</div>
+        </div>
+      </div>`;
+  });
+
+  // Strengths
+  const sl = document.getElementById('strList');
+  sl.innerHTML = '';
+  r.strengths.forEach(s => { sl.innerHTML += `<span class="str-tag">✦ ${s}</span>`; });
+
+  // Intermediate focus
+  document.getElementById('tipsBox').innerHTML = `
+    <div class="tips-char">${r.intermediateChar||'功'}</div>
+    <p class="tips-inner">${r.intermediateFocus}</p>`;
+
+  // Study references
+  const rl = document.getElementById('refsList');
+  rl.innerHTML = '';
+  (r.studyRefs||[]).forEach(ref => {
+    rl.innerHTML += `
+      <div class="ref-item">
+        <div class="ref-char">${ref.char}</div>
+        <div class="ref-body">
+          <div class="ref-name">${ref.name}</div>
+          <div class="ref-desc">${ref.reason}</div>
+        </div>
+        <span class="ref-badge">${ref.style}</span>
+      </div>`;
+  });
+}
+
+// ══════════════════════════════
+// HISTORY
+// ══════════════════════════════
+function saveToHistory(result) {
+  const notes = document.getElementById('notesInput').value.trim();
+  const entry = {
+    id: Date.now(),
+    date: new Date().toLocaleDateString('en-SG',{day:'2-digit',month:'short',year:'numeric'}),
+    time: new Date().toLocaleTimeString('en-SG',{hour:'2-digit',minute:'2-digit'}),
+    image: document.getElementById('previewImg').src,
+    result,
+    notes
+  };
+  history.unshift(entry);
+  if (history.length > 30) history = history.slice(0,30);
+  localStorage.setItem('mopingHistory', JSON.stringify(history));
+  updateHistCount();
+}
+
+function updateHistCount() {
+  const cnt = document.getElementById('histCount');
+  cnt.textContent = history.length;
+  cnt.classList.toggle('visible', history.length > 0);
+}
+
+function renderHistory() {
+  const grid = document.getElementById('histGrid');
+  const empty = document.getElementById('histEmpty');
+  const chartWrap = document.getElementById('progressChartWrap');
+  const clearBtn = document.getElementById('clearHistBtn');
+  const sub = document.getElementById('histSubtitle');
+
+  if (!history.length) {
+    empty.style.display = 'flex';
+    grid.style.display = 'none';
+    chartWrap.style.display = 'none';
+    clearBtn.style.display = 'none';
+    return;
+  }
+
+  empty.style.display = 'none';
+  grid.style.display = 'grid';
+  chartWrap.style.display = 'block';
+  clearBtn.style.display = 'block';
+
+  const avg = (history.reduce((a,e)=>a+e.result.overallScore,0)/history.length).toFixed(1);
+  const best = Math.max(...history.map(e=>e.result.overallScore));
+  sub.textContent = `${history.length} session${history.length>1?'s':''} · Average ${avg} · Best ${best}`;
+
+  // Progress chart (last 10)
+  const chartEntries = [...history].reverse().slice(-10);
+  const maxScore = 10;
+  const chart = document.getElementById('progressChart');
+  chart.innerHTML = '';
+  chartEntries.forEach((e,i) => {
+    const pct = (e.result.overallScore/maxScore)*100;
+    chart.innerHTML += `
+      <div class="chart-bar-wrap" style="animation-delay:${i*0.05}s">
+        <div class="chart-score-label">${e.result.overallScore}</div>
+        <div class="chart-bar" style="height:0%" data-h="${pct}%" title="${e.date}: ${e.result.overallScore}/10">
+          <div class="chart-tooltip">${e.date} · ${e.result.overallScore}/10</div>
+        </div>
+        <div class="chart-label">${e.date.split(' ')[0]} ${e.date.split(' ')[1]}</div>
+      </div>`;
+  });
+  requestAnimationFrame(()=>{ setTimeout(()=>{ document.querySelectorAll('.chart-bar').forEach(b=>b.style.height=b.dataset.h); },100); });
+
+  // Cards
+  grid.innerHTML = '';
+  history.forEach((e,idx) => {
+    const metricHtml = e.result.metrics.slice(0,4).map(m=>`
+      <div class="mini-m">
+        <div class="mini-m-label">${m.cn}</div>
+        <div class="mini-m-bar"><div class="mini-m-fill" data-w="${(m.score/10)*100}%"></div></div>
+      </div>`).join('');
+
+    grid.innerHTML += `
+      <div class="history-card" style="animation-delay:${idx*0.05}s" onclick="openHistModal(${e.id})">
+        <img class="history-card-img" src="${e.image}" alt="">
+        <div class="history-card-body">
+          <div class="history-card-top">
+            <span class="history-card-date">${e.date} · ${e.time}</span>
+            <span class="history-card-score">${e.result.overallScore}/10</span>
+          </div>
+          <div class="history-card-grade">${e.result.grade}</div>
+          <span class="history-card-style">${e.result.detectedStyle}</span>
+          <p class="history-card-summary">${e.result.summary}</p>
+          ${e.notes ? `<p class="history-card-notes">📝 ${e.notes}</p>` : ''}
+          <div class="mini-metrics">${metricHtml}</div>
+          <div class="history-card-actions">
+            <button class="btn-ghost" onclick="event.stopPropagation();deleteEntry(${e.id})">Delete</button>
+          </div>
+        </div>
+      </div>`;
+  });
+
+  requestAnimationFrame(()=>{ setTimeout(()=>{ document.querySelectorAll('.mini-m-fill').forEach(el=>el.style.width=el.dataset.w); },200); });
+}
+
+function deleteEntry(id) {
+  history = history.filter(e=>e.id!==id);
+  localStorage.setItem('mopingHistory',JSON.stringify(history));
+  updateHistCount();
+  renderHistory();
+}
+
+function clearHistory() {
+  if (!confirm('Clear all session history? This cannot be undone.')) return;
+  history = [];
+  localStorage.removeItem('mopingHistory');
+  updateHistCount();
+  renderHistory();
+}
+
+function openHistModal(id) {
+  const e = history.find(x=>x.id===id);
+  if (!e) return;
+  const r = e.result;
+
+  const metricsHtml = r.metrics.map(m=>`
+    <div class="metric-card" style="margin-bottom:.5rem">
+      <div class="metric-row">
+        <span class="metric-name-cn">${m.cn} <span class="metric-name-en">${m.name}</span></span>
+        <span class="metric-val">${m.score}/10</span>
+      </div>
+      <div class="metric-bar"><div class="metric-fill" style="width:${(m.score/10)*100}%"></div></div>
+      <p class="metric-note">${m.note}</p>
+    </div>`).join('');
+
+  const imprsHtml = r.improvements.map((imp,i)=>`
+    <div class="impr-card" style="margin-bottom:.5rem">
+      <div class="impr-num">${i+1}</div>
+      <div><div class="impr-title">${imp.title}</div><div class="impr-desc">${imp.desc}</div></div>
+    </div>`).join('');
+
+  document.getElementById('modalContent').innerHTML = `
+    <img class="modal-img" src="${e.image}" alt="">
+    <div class="modal-score-row">
+      <span class="modal-score-big">${r.overallScore}/10</span>
+      <span class="modal-grade">${r.grade}</span>
+      <span class="score-style">${r.detectedStyle}</span>
+    </div>
+    <p class="score-summary" style="margin-bottom:1.5rem">${r.summary}</p>
+    ${e.notes ? `<p style="font-size:.78rem;color:var(--jade-lt);font-style:italic;margin-bottom:1.2rem">📝 ${e.notes}</p>` : ''}
+    <p class="sec-head">Metrics</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1.2rem">${metricsHtml}</div>
+    <p class="sec-head">Improvements</p>
+    ${imprsHtml}
+    <p class="sec-head" style="margin-top:1rem">Strengths</p>
+    <div class="str-list">${r.strengths.map(s=>`<span class="str-tag">✦ ${s}</span>`).join('')}</div>
+    <p style="font-size:.7rem;color:var(--stone);margin-top:1.5rem;text-align:right">${e.date} · ${e.time}</p>`;
+
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modalOverlay'))
+    document.getElementById('modalOverlay').classList.remove('open');
+}
+
+// Init
+updateHistCount();
+setState('empty');
+</script>
+</body>
+</html>
