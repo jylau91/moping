@@ -64,7 +64,8 @@ The JSON must have exactly these fields:
 - studyRefs: an array of exactly 3 objects, each with: char (single Chinese character), name (master and work title), style (style name), reason (string under 15 words)`;
 
   try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    // Use the Responses API — required for gpt-5-mini
+    const response = await fetch('https://api.openai.com/v1/responses', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -72,24 +73,19 @@ The JSON must have exactly these fields:
       },
       body: JSON.stringify({
         model: 'gpt-5-mini',
-        max_completion_tokens: 1500,
-        messages: [
-          {
-            role: 'system',
-            content: systemPrompt
-          },
+        max_output_tokens: 2000,
+        instructions: systemPrompt,
+        input: [
           {
             role: 'user',
             content: [
               {
-                type: 'image_url',
-                image_url: {
-                  url: `data:${mediaType};base64,${imageBase64}`,
-                  detail: 'low'
-                }
+                type: 'input_image',
+                image_url: `data:${mediaType};base64,${imageBase64}`,
+                detail: 'low'
               },
               {
-                type: 'text',
+                type: 'input_text',
                 text: `Analyse this Chinese calligraphy for an intermediate student. ${styleHint} Return only the JSON object.`
               }
             ]
@@ -107,10 +103,11 @@ The JSON must have exactly these fields:
       };
     }
 
-    const raw = data.choices?.[0]?.message?.content || '';
+    // Responses API: output[0].content[0].text
+    const raw = data.output?.[0]?.content?.[0]?.text || '';
     const clean = raw.replace(/```json\n?|```/g, '').trim();
 
-    JSON.parse(clean);
+    JSON.parse(clean); // validate before returning
 
     return {
       statusCode: 200,
