@@ -1,4 +1,39 @@
-const sharp = require('sharp');
+let sharp;
+try { sharp = require('sharp'); } catch (e) { sharp = null; }
+
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+const callAnthropic = async (apiKey, systemPrompt, finalBase64, styleHint) => {
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 1500,
+      system: systemPrompt,
+      messages: [
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'image',
+              source: { type: 'base64', media_type: 'image/jpeg', data: finalBase64 }
+            },
+            {
+              type: 'text',
+              text: `Analyse this Chinese calligraphy for an intermediate student. ${styleHint} Return only the JSON object.`
+            }
+          ]
+        }
+      ]
+    })
+  });
+  return response;
+};
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
@@ -57,48 +92,30 @@ The JSON must have exactly these fields:
 - studyRefs: an array of exactly 3 objects, each with: char (single Chinese character), name (master and work title), style (style name), reason (string under 15 words)`;
 
   try {
-    // ── Resize image server-side to max 600px longest side ─────────────────
-    const inputBuffer = Buffer.from(imageBase64, 'base64');
-    const resizedBuffer = await sharp(inputBuffer)
-      .resize(600, 600, { fit: 'inside', withoutEnlargement: true })
-      .jpeg({ quality: 85 })
-      .toBuffer();
+    // ── Resize to max 600px (gracefully skip if sharp unavailable) ──────────
+    let finalBase64 = imageBase64;
+    if (sharp) {
+      try {
+        const inputBuffer = Buffer.from(imageBase64, 'base64');
+        const resizedBuffer = await sharp(inputBuffer)
+          .resize(600, 600, { fit: 'inside', withoutEnlargement: true })
+          .jpeg({ quality: 85 })
+          .toBuffer();
+        finalBase64 = resizedBuffer.toString('base64');
+      } catch (resizeErr) {
+        // sharp failed — proceed with original image
+        console.error('sharp resize failed, using original:', resizeErr.message);
+      }
+    }
 
-    const finalBase64 = resizedBuffer.toString('base64');
-
-    // ── Call Anthropic ─────────────────────────────────────────────────────
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 1500,
-        system: systemPrompt,
-        messages: [
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'image',
-                source: {
-                  type: 'base64',
-                  media_type: 'image/jpeg',
-                  data: finalBase64
-                }
-              },
-              {
-                type: 'text',
-                text: `Analyse this Chinese calligraphy for an intermediate student. ${styleHint} Return only the JSON object.`
-              }
-            ]
-          }
-        ]
-      })
-    });
+    // ── Call Anthropic with retry on 429 ───────────────────────────────────
+    let response;
+    const delays = [2000, 5000, 10000]; // 2s, 5s, 10s
+    for (let attempt = 0; attempt <= delays.length; attempt++) {
+      response = await callAnthropic(ANTHROPIC_API_KEY, systemPrompt, finalBase64, styleHint);
+      if (response.status !== 429) break;
+      if (attempt < delays.length) await sleep(delays[attempt]);
+    }
 
     const data = await response.json();
 
