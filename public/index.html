@@ -41,7 +41,6 @@ body {
   overflow-x: hidden;
 }
 
-/* Subtle warm texture */
 body::after {
   content:'';
   position:fixed; inset:0;
@@ -362,6 +361,55 @@ nav {
 /* Results content */
 .results-body { display:none; }
 
+/* ═══ Attribution Banner (NEW) ═══ */
+.attribution-banner {
+  display:none;
+  padding:1rem 1.3rem;
+  border:1px solid rgba(176,125,42,0.35);
+  border-left:4px solid var(--gold);
+  border-radius:0 8px 8px 0;
+  background: linear-gradient(135deg, rgba(176,125,42,0.06) 0%, rgba(192,57,43,0.03) 100%);
+  margin-bottom:1.8rem;
+  animation: riseIn .6s ease-out .05s both;
+}
+.attribution-banner.visible { display:block; }
+.attr-source-row {
+  display:flex; align-items:center; gap:.6rem;
+  margin-bottom:.5rem;
+}
+.attr-source-badge {
+  display:inline-flex; align-items:center; gap:.3rem;
+  padding:.2rem .7rem;
+  font-size:.65rem; letter-spacing:.1em;
+  border-radius:20px;
+  font-family:'Noto Sans SC',sans-serif;
+  border:1px solid rgba(176,125,42,0.3);
+  background: rgba(176,125,42,0.1);
+  color: var(--gold-dim);
+}
+.attr-source-badge .attr-icon { font-size:.75rem; }
+.attr-master-name {
+  font-family:'Noto Serif SC',serif;
+  font-size:1.15rem;
+  color:var(--text);
+  font-weight:700;
+  line-height:1.3;
+}
+.attr-work-name {
+  font-family:'Noto Serif SC',serif;
+  font-size:.88rem;
+  color:var(--gold-dim);
+  font-style:italic;
+  margin-top:.15rem;
+}
+.attr-note {
+  font-size:.78rem;
+  color:var(--text-soft);
+  margin-top:.4rem;
+  line-height:1.6;
+  font-style:italic;
+}
+
 /* Score hero */
 .score-hero {
   display:flex; gap:2rem; align-items:flex-start;
@@ -416,6 +464,12 @@ nav {
   color: var(--jade-lt);
 }
 .level-badge.master { border-color:rgba(176,125,42,0.5); background:rgba(176,125,42,0.1); color:var(--gold); }
+.level-badge.grandmaster {
+  border-color:rgba(176,125,42,0.6);
+  background: linear-gradient(135deg, rgba(176,125,42,0.15), rgba(192,57,43,0.08));
+  color:var(--gold-dim);
+  font-weight:500;
+}
 .level-badge.novice { border-color:rgba(192,57,43,0.3); background:rgba(192,57,43,0.06); color:var(--vermillion); }
 
 /* Section heading */
@@ -583,6 +637,13 @@ nav {
   font-family:'Noto Sans SC',sans-serif;
   background:rgba(176,125,42,0.08);
 }
+.history-card-attr {
+  display:block;
+  font-family:'Noto Serif SC',serif;
+  font-size:.75rem; color:var(--gold-dim);
+  margin-bottom:.4rem;
+  font-style:italic;
+}
 .history-card-summary { font-size:.8rem; color:var(--text-soft); line-height:1.55; font-style:italic; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
 .history-card-actions { display:flex; gap:.5rem; margin-top:.7rem; padding-top:.7rem; border-top:1px solid var(--border); }
 .history-card-notes { font-size:.72rem; color:var(--jade); font-style:italic; margin-top:.3rem; }
@@ -624,26 +685,48 @@ nav {
 }
 .modal-overlay.open { display:flex; }
 .modal-box {
-  background:var(--ink-light); border:1px solid rgba(196,154,26,0.3);
-  border-radius:4px; padding:2rem; max-width:680px; width:100%;
+  background:var(--bg-card); border:1px solid var(--border);
+  border-radius:8px; padding:2rem; max-width:680px; width:100%;
   max-height:80vh; overflow-y:auto;
   position:relative;
+  box-shadow: 0 16px 48px rgba(18,13,8,0.4);
 }
 .modal-close {
   position:absolute; top:.8rem; right:.8rem;
-  background:transparent; border:1px solid rgba(196,154,26,0.2);
-  color:var(--stone-lt); width:28px; height:28px; font-size:.8rem;
-  cursor:pointer; border-radius:2px; transition:all .2s;
+  background:transparent; border:1px solid var(--border);
+  color:var(--text-soft); width:28px; height:28px; font-size:.8rem;
+  cursor:pointer; border-radius:4px; transition:all .2s;
   display:flex; align-items:center; justify-content:center;
 }
 .modal-close:hover { border-color:var(--gold); color:var(--gold); }
-.modal-img { width:100%; border-radius:3px; margin-bottom:1.5rem; border:1px solid rgba(196,154,26,0.2); }
-.modal-score-row { display:flex; align-items:center; gap:1.5rem; margin-bottom:1.5rem; }
-.modal-score-big { font-family:'Cinzel Decorative',serif; font-size:2.5rem; color:var(--gold-light); }
+.modal-img { width:100%; border-radius:6px; margin-bottom:1.5rem; border:1px solid var(--border); }
+.modal-score-row { display:flex; align-items:center; gap:1rem; margin-bottom:1rem; flex-wrap:wrap; }
+.modal-score-big { font-family:'Cinzel Decorative',serif; font-size:2.5rem; color:var(--gold); }
 .modal-grade { font-family:'Noto Serif SC',serif; font-size:1.5rem; color:var(--vermillion); }
 
+/* Modal attribution */
+.modal-attr-banner {
+  display:none;
+  padding:.8rem 1rem;
+  border:1px solid rgba(176,125,42,0.3);
+  border-left:3px solid var(--gold);
+  border-radius:0 6px 6px 0;
+  background: rgba(176,125,42,0.05);
+  margin-bottom:1.2rem;
+}
+.modal-attr-banner.visible { display:block; }
+.modal-attr-text {
+  font-family:'Noto Serif SC',serif;
+  font-size:.85rem; color:var(--text);
+  line-height:1.5;
+}
+.modal-attr-source {
+  font-size:.7rem; color:var(--gold-dim);
+  font-family:'Noto Sans SC',sans-serif;
+  margin-top:.3rem;
+}
+
 @media(max-width:768px){
-  /* ── Nav ── */
   nav {
     padding: 0 1rem;
     height: auto;
@@ -659,7 +742,6 @@ nav {
   .nav-tabs { order: 3; width: 100%; justify-content: center; }
   .font-size-ctrl { order: 2; }
 
-  /* ── Analyse page: single column scroll ── */
   #page-analyse.active {
     display: flex;
     flex-direction: column;
@@ -671,9 +753,7 @@ nav {
     padding: 1.2rem 1rem;
     width: 100%;
   }
-  .upload-zone {
-    aspect-ratio: 4/3;
-  }
+  .upload-zone { aspect-ratio: 4/3; }
   .col-results {
     max-height: none;
     overflow-y: visible;
@@ -681,22 +761,17 @@ nav {
     width: 100%;
   }
 
-  /* ── Score hero stacks ── */
   .score-hero { flex-direction: column; align-items: center; text-align: center; gap: 1rem; }
   .score-info { width: 100%; }
 
-  /* ── Metrics single col ── */
   .metrics-grid { grid-template-columns: 1fr; }
 
-  /* ── History ── */
   #page-history { padding: 1.2rem 1rem; }
   .history-grid { grid-template-columns: 1fr; }
   .history-head { flex-direction: column; align-items: flex-start; gap: .5rem; }
 
-  /* ── Modal ── */
   .modal-content { margin: 1rem; padding: 1.2rem; }
 
-  /* ── Hide decorative side text ── */
   .side-deco { display: none; }
 }
 
@@ -812,6 +887,16 @@ nav {
 
     <div class="results-body" id="resBody">
 
+      <!-- Attribution banner (shown for historical works) -->
+      <div class="attribution-banner" id="attrBanner">
+        <div class="attr-source-row">
+          <span class="attr-source-badge"><span class="attr-icon">碑</span> <span id="attrSourceType">—</span></span>
+        </div>
+        <div class="attr-master-name" id="attrMasterName"></div>
+        <div class="attr-work-name" id="attrWorkName"></div>
+        <div class="attr-note" id="attrNote">This is a historical masterwork. Scores reflect the quality of the original calligraphy.</div>
+      </div>
+
       <div class="score-hero">
         <div class="score-dial" id="scoreDial">
           <span class="score-val" id="scoreVal">—</span>
@@ -830,13 +915,13 @@ nav {
       <p class="sec-head">Stroke Analysis 筆畫分析</p>
       <div class="metrics-grid" id="metricsGrid"></div>
 
-      <p class="sec-head">Areas for Improvement 改進建議</p>
+      <p class="sec-head" id="imprHead">Areas for Improvement 改進建議</p>
       <div class="impr-list" id="imprList"></div>
 
       <p class="sec-head">Identified Strengths 優點</p>
       <div class="str-list" id="strList"></div>
 
-      <p class="sec-head">Intermediate Focus 學習重點</p>
+      <p class="sec-head" id="focusHead">Intermediate Focus 學習重點</p>
       <div class="tips-box" id="tipsBox"></div>
 
       <p class="sec-head">Recommended Study 推薦參考</p>
@@ -932,7 +1017,6 @@ function loadFile(file) {
   r.onload = e => {
     const img = new Image();
     img.onload = () => {
-      // Resize: cap longest side at 1000px
       const MAX = 800;
       let w = img.width, h = img.height;
       if (w > MAX || h > MAX) {
@@ -986,6 +1070,43 @@ function setState(s) {
   document.getElementById('resLoading').style.display = s==='loading' ? 'flex'  : 'none';
   document.getElementById('resError').style.display   = s==='error'   ? 'flex'  : 'none';
   document.getElementById('resBody').style.display    = s==='results' ? 'block' : 'none';
+}
+
+// ══════════════════════════════
+// HELPERS
+// ══════════════════════════════
+
+// Check if a result is a historical/masterwork piece (not student practice)
+function isHistorical(r) {
+  const st = (r.sourceType || '').toLowerCase();
+  return st.includes('stone') || st.includes('拓片') || st.includes('rubbing')
+    || st.includes('copybook') || st.includes('字帖')
+    || st.includes('墨跡') || st.includes('original ink');
+}
+
+// Parse attribution into master name and work name
+function parseAttribution(attr) {
+  if (!attr) return { master: null, work: null };
+  // Patterns: "歐陽詢 Ouyang Xun — 九成宮醴泉銘" or "in the style of 顏真卿" or just "王羲之"
+  const dashSplit = attr.split(/\s*[—–-]\s*/);
+  if (dashSplit.length >= 2) {
+    return { master: dashSplit[0].trim(), work: dashSplit.slice(1).join(' — ').trim() };
+  }
+  // "in the style of X" or "attributed to X"
+  const styleOf = attr.match(/(?:in the style of|attributed to)\s+(.+)/i);
+  if (styleOf) return { master: styleOf[1].trim(), work: null };
+  return { master: attr.trim(), work: null };
+}
+
+// Source type icon mapping
+function sourceIcon(st) {
+  if (!st) return '書';
+  const s = st.toLowerCase();
+  if (s.includes('stone') || s.includes('拓片')) return '碑';
+  if (s.includes('rubbing') || s.includes('翻印')) return '拓';
+  if (s.includes('copybook') || s.includes('字帖')) return '帖';
+  if (s.includes('墨跡') || s.includes('original')) return '墨';
+  return '習';
 }
 
 // ══════════════════════════════
@@ -1049,7 +1170,44 @@ function togglePw() {
 // RENDER RESULT
 // ══════════════════════════════
 function renderResult(r) {
-  // Score hero
+  // ── Attribution banner ──
+  const banner = document.getElementById('attrBanner');
+  const hasAttr = r.attribution && r.attribution !== 'null' && r.attribution !== null;
+  const historical = isHistorical(r);
+
+  if (hasAttr || historical) {
+    banner.classList.add('visible');
+    document.getElementById('attrSourceType').textContent = r.sourceType || 'Historical Work';
+
+    // Update icon
+    const iconEl = banner.querySelector('.attr-icon');
+    iconEl.textContent = sourceIcon(r.sourceType);
+
+    if (hasAttr) {
+      const parsed = parseAttribution(r.attribution);
+      document.getElementById('attrMasterName').textContent = parsed.master || r.attribution;
+      document.getElementById('attrWorkName').textContent = parsed.work || '';
+      document.getElementById('attrWorkName').style.display = parsed.work ? 'block' : 'none';
+    } else {
+      document.getElementById('attrMasterName').textContent = '';
+      document.getElementById('attrWorkName').textContent = '';
+      document.getElementById('attrWorkName').style.display = 'none';
+    }
+
+    // Contextual note
+    const noteEl = document.getElementById('attrNote');
+    if (hasAttr && (r.sourceType || '').toLowerCase().includes('stone')) {
+      noteEl.textContent = 'Stone rubbing of a historical inscription. Scores reflect the mastery of the original calligrapher.';
+    } else if (hasAttr) {
+      noteEl.textContent = 'Identified as a historical masterwork. Scores reflect the quality of the original calligraphy.';
+    } else {
+      noteEl.textContent = 'Historical or reproduced work detected. Attribution could not be confirmed.';
+    }
+  } else {
+    banner.classList.remove('visible');
+  }
+
+  // ── Score hero ──
   document.getElementById('scoreVal').textContent = r.overallScore;
   document.getElementById('scoreGrade').textContent = r.grade;
   document.getElementById('scoreStyle').textContent = r.detectedStyle;
@@ -1058,15 +1216,16 @@ function renderResult(r) {
   const scoreEl = document.getElementById('scoreVal');
   scoreEl.style.color = r.overallScore >= 8 ? '#e0b835' : r.overallScore >= 6 ? '#c49a1a' : '#b83025';
 
-  // Practitioner level badge
+  // ── Practitioner level badge ──
   const lb = document.getElementById('levelBadge');
   const level = r.practitionerLevel || '';
   lb.textContent = level;
   lb.className = 'level-badge';
-  if (['Master','Grandmaster'].includes(level)) lb.classList.add('master');
-  else if (['Novice'].includes(level)) lb.classList.add('novice');
+  if (level === 'Grandmaster') lb.classList.add('grandmaster');
+  else if (level === 'Master') lb.classList.add('master');
+  else if (level === 'Novice') lb.classList.add('novice');
 
-  // Update focus section heading dynamically
+  // ── Dynamic section headings ──
   const focusLabel = {
     'Novice': 'Beginner Focus 入門重點',
     'Beginner': 'Beginner Focus 初學重點',
@@ -1076,10 +1235,15 @@ function renderResult(r) {
     'Master': 'Master Refinement 精進重點',
     'Grandmaster': 'Connoisseur Notes 鑑賞評注',
   };
-  document.querySelector('[id="tipsBox"]').previousElementSibling.textContent =
-    (focusLabel[level] || 'Practice Focus 學習重點');
+  document.getElementById('focusHead').textContent = focusLabel[level] || 'Practice Focus 學習重點';
 
-  // Metrics
+  // Improvements heading: "Connoisseur Observations" for masterworks
+  const imprLabel = (level === 'Grandmaster' || level === 'Master')
+    ? 'Connoisseur Observations 鑑賞要點'
+    : 'Areas for Improvement 改進建議';
+  document.getElementById('imprHead').textContent = imprLabel;
+
+  // ── Metrics ──
   const mg = document.getElementById('metricsGrid');
   mg.innerHTML = '';
   r.metrics.forEach(m => {
@@ -1096,7 +1260,7 @@ function renderResult(r) {
   });
   requestAnimationFrame(()=>{ setTimeout(()=>{ document.querySelectorAll('.metric-fill').forEach(el=>el.style.width=el.dataset.w); },80); });
 
-  // Improvements
+  // ── Improvements ──
   const il = document.getElementById('imprList');
   il.innerHTML = '';
   r.improvements.forEach((imp,i) => {
@@ -1110,17 +1274,17 @@ function renderResult(r) {
       </div>`;
   });
 
-  // Strengths
+  // ── Strengths ──
   const sl = document.getElementById('strList');
   sl.innerHTML = '';
   r.strengths.forEach(s => { sl.innerHTML += `<span class="str-tag">✦ ${s}</span>`; });
 
-  // Intermediate focus
+  // ── Intermediate focus ──
   document.getElementById('tipsBox').innerHTML = `
     <div class="tips-char">${r.intermediateChar||'功'}</div>
     <p class="tips-inner">${r.intermediateFocus}</p>`;
 
-  // Study references
+  // ── Study references ──
   const rl = document.getElementById('refsList');
   rl.innerHTML = '';
   (r.studyRefs||[]).forEach(ref => {
@@ -1206,7 +1370,10 @@ function renderHistory() {
   // Cards
   grid.innerHTML = '';
   history.forEach((e,idx) => {
-    const metricHtml = e.result.metrics.slice(0,4).map(m=>`
+    const r = e.result;
+    const hasAttr = r.attribution && r.attribution !== 'null' && r.attribution !== null;
+
+    const metricHtml = r.metrics.slice(0,4).map(m=>`
       <div class="mini-m">
         <div class="mini-m-label">${m.cn}</div>
         <div class="mini-m-bar"><div class="mini-m-fill" data-w="${(m.score/10)*100}%"></div></div>
@@ -1218,11 +1385,12 @@ function renderHistory() {
         <div class="history-card-body">
           <div class="history-card-top">
             <span class="history-card-date">${e.date} · ${e.time}</span>
-            <span class="history-card-score">${e.result.overallScore}/10</span>
+            <span class="history-card-score">${r.overallScore}/10</span>
           </div>
-          <div class="history-card-grade">${e.result.grade}${e.result.practitionerLevel ? ` <span style="font-size:.7rem;color:var(--jade-lt);font-family:'Noto Sans SC',sans-serif;font-weight:400">· ${e.result.practitionerLevel}</span>` : ''}</div>
-          <span class="history-card-style">${e.result.detectedStyle}</span>
-          <p class="history-card-summary">${e.result.summary}</p>
+          <div class="history-card-grade">${r.grade}${r.practitionerLevel ? ` <span style="font-size:.7rem;color:var(--jade-lt);font-family:'Noto Sans SC',sans-serif;font-weight:400">· ${r.practitionerLevel}</span>` : ''}</div>
+          <span class="history-card-style">${r.detectedStyle}</span>
+          ${hasAttr ? `<span class="history-card-attr">${sourceIcon(r.sourceType)} ${r.attribution}</span>` : ''}
+          <p class="history-card-summary">${r.summary}</p>
           ${e.notes ? `<p class="history-card-notes">📝 ${e.notes}</p>` : ''}
           <div class="mini-metrics">${metricHtml}</div>
           <div class="history-card-actions">
@@ -1254,6 +1422,19 @@ function openHistModal(id) {
   const e = history.find(x=>x.id===id);
   if (!e) return;
   const r = e.result;
+  const hasAttr = r.attribution && r.attribution !== 'null' && r.attribution !== null;
+  const historical = isHistorical(r);
+
+  // Build attribution banner for modal
+  let attrHtml = '';
+  if (hasAttr || historical) {
+    const parsed = hasAttr ? parseAttribution(r.attribution) : { master: null, work: null };
+    attrHtml = `
+      <div class="modal-attr-banner visible">
+        <div class="modal-attr-source">${sourceIcon(r.sourceType)} ${r.sourceType || 'Historical Work'}</div>
+        ${parsed.master ? `<div class="modal-attr-text">${parsed.master}${parsed.work ? ' — ' + parsed.work : ''}</div>` : ''}
+      </div>`;
+  }
 
   const metricsHtml = r.metrics.map(m=>`
     <div class="metric-card" style="margin-bottom:.5rem">
@@ -1271,23 +1452,29 @@ function openHistModal(id) {
       <div><div class="impr-title">${imp.title}</div><div class="impr-desc">${imp.desc}</div></div>
     </div>`).join('');
 
+  const level = r.practitionerLevel || '';
+  const imprLabel = (level === 'Grandmaster' || level === 'Master')
+    ? 'Connoisseur Observations'
+    : 'Improvements';
+
   document.getElementById('modalContent').innerHTML = `
     <img class="modal-img" src="${e.image}" alt="">
+    ${attrHtml}
     <div class="modal-score-row">
       <span class="modal-score-big">${r.overallScore}/10</span>
       <span class="modal-grade">${r.grade}</span>
       <span class="score-style">${r.detectedStyle}</span>
-      ${r.practitionerLevel ? `<span class="level-badge${['Master','Grandmaster'].includes(r.practitionerLevel)?' master':['Novice'].includes(r.practitionerLevel)?' novice':''}">${r.practitionerLevel}</span>` : ''}
+      ${level ? `<span class="level-badge${level==='Grandmaster'?' grandmaster':level==='Master'?' master':level==='Novice'?' novice':''}">${level}</span>` : ''}
     </div>
     <p class="score-summary" style="margin-bottom:1.5rem">${r.summary}</p>
     ${e.notes ? `<p style="font-size:.78rem;color:var(--jade-lt);font-style:italic;margin-bottom:1.2rem">📝 ${e.notes}</p>` : ''}
     <p class="sec-head">Metrics</p>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1.2rem">${metricsHtml}</div>
-    <p class="sec-head">Improvements</p>
+    <p class="sec-head">${imprLabel}</p>
     ${imprsHtml}
     <p class="sec-head" style="margin-top:1rem">Strengths</p>
     <div class="str-list">${r.strengths.map(s=>`<span class="str-tag">✦ ${s}</span>`).join('')}</div>
-    <p style="font-size:.7rem;color:var(--stone);margin-top:1.5rem;text-align:right">${e.date} · ${e.time}</p>`;
+    <p style="font-size:.7rem;color:var(--text-mute);margin-top:1.5rem;text-align:right">${e.date} · ${e.time}</p>`;
 
   document.getElementById('modalOverlay').classList.add('open');
 }
