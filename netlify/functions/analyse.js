@@ -7,26 +7,20 @@ exports.handler = async (event) => {
   if (!OPENAI_API_KEY) {
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: 'OpenAI API key not configured. Set OPENAI_API_KEY in environment variables.' })
+      body: JSON.stringify({ error: 'OpenAI API key not configured.' })
     };
   }
 
   const MOPING_PASSWORD = process.env.MOPING_PASSWORD;
 
   let body;
-  try {
-    body = JSON.parse(event.body);
-  } catch {
-    return { statusCode: 400, body: JSON.stringify({ error: 'Invalid request body' }) };
-  }
+  try { body = JSON.parse(event.body); }
+  catch { return { statusCode: 400, body: JSON.stringify({ error: 'Invalid request body' }) }; }
 
   const { imageBase64, mediaType, style, password } = body;
 
   if (MOPING_PASSWORD && password !== MOPING_PASSWORD) {
-    return {
-      statusCode: 401,
-      body: JSON.stringify({ error: 'Incorrect password.' })
-    };
+    return { statusCode: 401, body: JSON.stringify({ error: 'Incorrect password.' }) };
   }
 
   if (!imageBase64 || !mediaType) {
@@ -64,49 +58,55 @@ The JSON must have exactly these fields:
 - studyRefs: an array of exactly 3 objects, each with: char (single Chinese character), name (master and work title), style (style name), reason (string under 15 words)`;
 
   try {
-    // Use the Responses API — required for gpt-5-mini
+    const requestBody = {
+      model: 'gpt-5-mini',
+      instructions: systemPrompt,
+      input: [
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'input_image',
+              image_url: {
+                url: `data:${mediaType};base64,${imageBase64}`,
+                detail: 'low'
+              }
+            },
+            {
+              type: 'input_text',
+              text: `Analyse this Chinese calligraphy for an intermediate student. ${styleHint} Return only the JSON object.`
+            }
+          ]
+        }
+      ]
+    };
+
     const response = await fetch('https://api.openai.com/v1/responses', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${OPENAI_API_KEY}`
       },
-      body: JSON.stringify({
-        model: 'gpt-5-mini',
-        instructions: systemPrompt,
-        input: [
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'input_image',
-                image_url: `data:${mediaType};base64,${imageBase64}`,
-                detail: 'low'
-              },
-              {
-                type: 'input_text',
-                text: `Analyse this Chinese calligraphy for an intermediate student. ${styleHint} Return only the JSON object.`
-              }
-            ]
-          }
-        ]
-      })
+      body: JSON.stringify(requestBody)
     });
 
     const data = await response.json();
 
     if (!response.ok) {
+      // Return full error details for debugging
       return {
         statusCode: response.status,
-        body: JSON.stringify({ error: data.error?.message || 'OpenAI API error' })
+        body: JSON.stringify({
+          error: data.error?.message || 'OpenAI API error',
+          details: data.error || data
+        })
       };
     }
 
-    // Responses API: output[0].content[0].text
     const raw = data.output?.[0]?.content?.[0]?.text || '';
     const clean = raw.replace(/```json\n?|```/g, '').trim();
 
-    JSON.parse(clean); // validate before returning
+    JSON.parse(clean);
 
     return {
       statusCode: 200,
