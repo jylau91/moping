@@ -1,31 +1,44 @@
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
 // ══════════════════════════════
-// ANTHROPIC API CALL
+// MODELS — Haiku for pass 1 (cheap), Sonnet for correction (accurate)
 // ══════════════════════════════
-const callAnthropic = async (apiKey, systemPrompt, messages) => {
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01'
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 3000,
-      system: systemPrompt,
-      messages
-    })
-  });
-  return response;
-};
+const MODEL_FAST  = 'claude-haiku-4-5-20251001';   // ~$0.001/req
+const MODEL_SMART = 'claude-sonnet-4-6';            // ~$0.022/req
+
+// ══════════════════════════════
+// COMPRESSED SYSTEM PROMPT (trimmed ~35% tokens from original)
+// ══════════════════════════════
+const SYSTEM_PROMPT = `You are a world-class Chinese calligraphy connoisseur and art historian.
+Return ONLY a raw JSON object. No markdown, no backticks, no prose. Start with { end with }.
+
+STEP 1 — CLASSIFY THE IMAGE FIRST
+
+A) STONE RUBBING (碑刻拓片): White chars on dark stone, grid layout, erosion marks. Score floor: 8.5. Identify stele + calligrapher.
+B) HISTORICAL INK (墨跡真跡): Aged paper/silk, red collector seals (紅印), fan/scroll/album format. Score floor: 8.0.
+C) COPYBOOK (字帖): Printed reproduction of famous work. Score the original. Floor: 8.0.
+D) CONTEMPORARY MASTER (當代作品): Fresh ink, quality paper, artist's seal. Range: 7.0–9.0.
+E) STUDENT PRACTICE (習作): Practice paper, hesitation marks, no seals. Range: 1.0–7.0.
+
+STEP 2 — IDENTIFY (A–C only)
+
+Stone rubbings: 歐陽詢(九成宮醴泉銘,險勁), 顏真卿(多寶塔碑/顏勤禮碑,寬博), 柳公權(玄秘塔碑/神策軍碑,骨力), 褚遂良(雁塔聖教序), 虞世南(孔子廟堂碑).
+Historical ink: 王羲之(蘭亭集序), 蘇軾(寒食帖), 趙孟頫(洛神賦), 米芾(蜀素帖), 黃庭堅(松風閣詩帖), 楊妹子(Southern Song fan kaishu), 弘一法師, 啟功.
+
+STEP 3 — SCORE (full 1–10 range)
+
+Anchors: 10=蘭亭集序/祭姪文稿, 9.5=九成宮醴泉銘/玄秘塔碑, 9=major master works, 8.5=lesser master works, 8=accomplished master, 7=advanced(10+yr), 5–6=intermediate, 3–4=beginner, 1–2=first attempts.
+
+HARD RULES: Stone rubbing of Tang/Song master→9+. Museum piece with seals→8.5+. Student practice→2–6. Gap between student and masterwork≥3pts.
+
+JSON SCHEMA:
+{"sourceType":"石刻拓片 Stone Rubbing"|"墨跡真跡 Historical Ink"|"字帖 Copybook"|"當代作品 Contemporary"|"習作 Practice Work","attribution":"calligrapher — work"|"in the style of X"|null,"overallScore":1.0-10.0,"grade":"優秀"(≥8)|"良好"(6.5-7.9)|"中等"(5-6.4)|"尚可"(3.5-4.9)|"需努力"(<3.5),"practitionerLevel":"Novice"|"Beginner"|"Early Intermediate"|"Solid Intermediate"|"Advanced"|"Master"|"Grandmaster","detectedStyle":"style — attribution","summary":"2–3 sentences","metrics":[{"name":"Stroke Weight","cn":"筆力","score":N,"note":"<20w"},{"name":"Brush Flow","cn":"行氣","score":N,"note":"<20w"},{"name":"Structure","cn":"結體","score":N,"note":"<20w"},{"name":"Spacing","cn":"佈局","score":N,"note":"<20w"},{"name":"Ink","cn":"墨色","score":N,"note":"<20w"},{"name":"Rhythm","cn":"節奏","score":N,"note":"<20w"}],"improvements":[{"title":"≤5w","desc":"≤30w"},{"title":"","desc":""},{"title":"","desc":""}],"strengths":["s1","s2","s3"],"intermediateFocus":"2 sentences","intermediateChar":"single char","studyRefs":[{"char":"X","name":"master — work","style":"s","reason":"<15w"},{"char":"X","name":"","style":"","reason":""},{"char":"X","name":"","style":"","reason":""}]}
+
+Dark bg + white chars = rubbing = 9+. Aged paper + red seals = museum = 8.5+. Fresh ink practice paper = student = score on merit.`;
 
 // ══════════════════════════════
 // SCORE VALIDATION
 // ══════════════════════════════
-// If the model classifies the image as historical but scores it low,
-// we catch this contradiction and ask for a correction.
 function validateResult(parsed) {
   const st = (parsed.sourceType || '').toLowerCase();
   const score = parsed.overallScore;
@@ -38,27 +51,24 @@ function validateResult(parsed) {
 
   const hasAttribution = attr && attr !== null && attr !== 'null' && attr.length > 2;
 
-  // RULE: Historical masterwork classified but scored below floor
   if (isHistorical && score < 8.0) {
     return {
       valid: false,
-      reason: `You classified this as "${parsed.sourceType}" ${hasAttribution ? `attributed to "${attr}"` : ''} but scored it ${score}/10. Historical masterworks and stone rubbings by famous calligraphers must score 8.0+. A Tang dynasty stele rubbing should be 9.0–9.5. Please re-evaluate with corrected scores.`
+      reason: `Classified as "${parsed.sourceType}"${hasAttribution ? ` attributed to "${attr}"` : ''} but scored ${score}. Historical masterworks must score 8.0+. Tang stele rubbings: 9.0–9.5. Re-score.`
     };
   }
 
-  // RULE: Has specific attribution to a famous master but scored below 8
   if (hasAttribution && score < 8.0) {
     return {
       valid: false,
-      reason: `You attributed this to "${attr}" but scored it ${score}/10. Works by recognised historical masters must score 8.0+. Please re-evaluate with corrected scores.`
+      reason: `Attributed to "${attr}" but scored ${score}. Recognised master works must score 8.0+. Re-score.`
     };
   }
 
-  // RULE: Grandmaster level but scored below 8.5
   if (parsed.practitionerLevel === 'Grandmaster' && score < 8.5) {
     return {
       valid: false,
-      reason: `You classified the practitioner level as "Grandmaster" but scored it ${score}/10. Grandmaster-level work must score 8.5+. Please re-evaluate.`
+      reason: `Level "Grandmaster" but scored ${score}. Must be 8.5+. Re-score.`
     };
   }
 
@@ -66,107 +76,43 @@ function validateResult(parsed) {
 }
 
 // ══════════════════════════════
-// SYSTEM PROMPT
+// API CALL (with prompt caching)
 // ══════════════════════════════
-const SYSTEM_PROMPT = `You are a world-class Chinese calligraphy connoisseur and art historian.
+const callAnthropic = async (apiKey, model, messages) => {
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-beta': 'prompt-caching-2024-07-31'
+    },
+    body: JSON.stringify({
+      model,
+      max_tokens: 2000,
+      system: [
+        {
+          type: 'text',
+          text: SYSTEM_PROMPT,
+          cache_control: { type: 'ephemeral' }
+        }
+      ],
+      messages
+    })
+  });
+  return response;
+};
 
-CRITICAL OUTPUT RULE: Return ONLY a raw JSON object. No markdown, no backticks, no prose. Start with { end with }.
-
-══════════════════════════════════════════
-STEP 1 — CLASSIFY THE IMAGE (do this FIRST)
-══════════════════════════════════════════
-
-CATEGORY A — STONE RUBBING (碑刻拓片): Score floor 8.5
-  White/light characters on dark stone background. Grid layout. Stone texture/erosion.
-  → Almost always a famous historical inscription. Identify the stele and calligrapher.
-
-CATEGORY B — HISTORICAL INK (墨跡真跡): Score floor 8.0
-  Brush on aged paper/silk. Yellowed material. Red collector seals (紅印/藏印).
-  Fan-shaped, scroll, or album leaf. Museum-quality presentation.
-  → Multiple collector seals = virtually certain museum piece.
-
-CATEGORY C — COPYBOOK (字帖): Score floor 8.0
-  Printed reproduction of a famous work. Score the original's quality.
-
-CATEGORY D — CONTEMPORARY MASTER (當代作品): Score range 7.0–9.0
-  Fresh ink, quality paper, confident execution, artist's seal.
-
-CATEGORY E — STUDENT PRACTICE (習作): Score range 1.0–7.0
-  Fresh ink, practice paper, hesitation marks, no seals.
-
-══════════════════════════════════════════
-STEP 2 — IDENTIFY (Categories A–C)
-══════════════════════════════════════════
-
-Stone rubbings:
-• 歐陽詢 Ouyang Xun — 九成宮醴泉銘 (tight, angular, 險勁)
-• 顏真卿 Yan Zhenqing — 多寶塔碑, 顏勤禮碑 (wide, thick, 寬博)
-• 柳公權 Liu Gongquan — 玄秘塔碑, 神策軍碑 (bone-strength, sharp hooks)
-• 褚遂良 Chu Suiliang — 雁塔聖教序 (elegant, flowing)
-• 虞世南 Yu Shinan — 孔子廟堂碑 (gentle, rounded)
-
-Historical ink:
-• 王羲之 Wang Xizhi — 蘭亭集序, 快雪時晴帖
-• 蘇軾 Su Shi — 寒食帖 • 趙孟頫 Zhao Mengfu — 洛神賦
-• 米芾 Mi Fu — 蜀素帖 • 黃庭堅 Huang Tingjian — 松風閣詩帖
-• 楊妹子 Yang Meizi — Southern Song, fan/album kaishu
-• 弘一法師 Hongyi — sparse kaishu • 啟功 Qi Gong — slender elegant
-
-══════════════════════════════════════════
-STEP 3 — SCORE (use the full 1–10 range)
-══════════════════════════════════════════
-
-CALIBRATION ANCHORS:
-  10.0 = 蘭亭集序, 祭姪文稿
-   9.5 = 九成宮醴泉銘, 玄秘塔碑
-   9.0 = Major dynasty master works
-   8.5 = Lesser works by major masters
-   8.0 = Accomplished historical/contemporary master
-   7.0 = Advanced (10+ years)
-   5.0–6.0 = Intermediate student
-   3.0–4.0 = Beginner
-   1.0–2.0 = First attempts
-
-HARD RULES:
-- Stone rubbing of a Tang/Song master → score 9.0–9.5
-- Museum piece with collector seals → score 8.5–9.5
-- Student single-character practice → score 2.0–6.0
-- Gap between student and masterwork must be ≥3 points
-
-══════════════════════════════════════════
-JSON SCHEMA
-══════════════════════════════════════════
-
-{
-  "sourceType": "石刻拓片 Stone Rubbing" | "墨跡真跡 Historical Ink" | "字帖 Copybook" | "當代作品 Contemporary" | "習作 Practice Work",
-  "attribution": "calligrapher — work" | "in the style of X" | null,
-  "overallScore": 1.0–10.0,
-  "grade": "優秀" (≥8) | "良好" (6.5–7.9) | "中等" (5–6.4) | "尚可" (3.5–4.9) | "需努力" (<3.5),
-  "practitionerLevel": "Novice"|"Beginner"|"Early Intermediate"|"Solid Intermediate"|"Advanced"|"Master"|"Grandmaster",
-  "detectedStyle": "style — attribution if known",
-  "summary": "2–3 sentences",
-  "metrics": [
-    {"name":"Stroke Weight","cn":"筆力","score":N,"note":"<20 words"},
-    {"name":"Brush Flow","cn":"行氣","score":N,"note":"<20 words"},
-    {"name":"Structure","cn":"結體","score":N,"note":"<20 words"},
-    {"name":"Spacing","cn":"佈局","score":N,"note":"<20 words"},
-    {"name":"Ink","cn":"墨色","score":N,"note":"<20 words"},
-    {"name":"Rhythm","cn":"節奏","score":N,"note":"<20 words"}
-  ],
-  "improvements": [{"title":"≤5 words","desc":"≤30 words"},{"title":"...","desc":"..."},{"title":"...","desc":"..."}],
-  "strengths": ["str1","str2","str3"],
-  "intermediateFocus": "2 sentences",
-  "intermediateChar": "single char",
-  "studyRefs": [
-    {"char":"X","name":"master — work","style":"style","reason":"<15 words"},
-    {"char":"X","name":"...","style":"...","reason":"..."},
-    {"char":"X","name":"...","style":"...","reason":"..."}
-  ]
-}
-
-REMINDER: If you see dark background + white characters → stone rubbing → score 9+
-If you see aged paper + red seals → museum piece → score 8.5+
-If you see fresh ink on practice paper → student → score on actual merit (often 3–6)`;
+const callWithRetry = async (apiKey, model, messages) => {
+  let response;
+  const delays = [2000, 5000, 10000];
+  for (let attempt = 0; attempt <= delays.length; attempt++) {
+    response = await callAnthropic(apiKey, model, messages);
+    if (response.status !== 429) break;
+    if (attempt < delays.length) await sleep(delays[attempt]);
+  }
+  return response;
+};
 
 // ══════════════════════════════
 // HANDLER
@@ -198,54 +144,30 @@ exports.handler = async (event) => {
   }
 
   const styleHint = style && style !== 'auto'
-    ? `The user indicates this may be ${style} style.`
-    : 'Auto-detect the calligraphy style.';
+    ? `Style hint: ${style}.`
+    : '';
 
   try {
-    // Note: Image resizing is handled client-side (canvas 800px cap).
-    // No server-side sharp dependency needed.
-    const finalBase64 = imageBase64;
+    const userMsg = `Analyse this calligraphy. ${styleHint} Classify first (rubbing/historical/student), then score accordingly. Dark bg+white chars=rubbing=9+. Aged+seals=museum=8.5+. Student=merit. JSON only.`;
 
-    // ── Build initial messages ─────────────────────────────────────────────
-    const userMsg = `Analyse this Chinese calligraphy image. ${styleHint}
-
-IMPORTANT — Before scoring, classify the image:
-• Dark background + white characters = stone rubbing = MUST score 9+
-• Aged paper/silk + red collector seals = museum piece = MUST score 8.5+
-• Fresh ink on practice paper = student work = score on merit (often 3–6)
-
-Your classification determines the scoring range. Return only the JSON object.`;
-
-    let messages = [
+    const messages = [
       {
         role: 'user',
         content: [
-          { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: finalBase64 } },
+          { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: imageBase64 } },
           { type: 'text', text: userMsg }
         ]
       }
     ];
 
-    // ── Call with retry on 429 ─────────────────────────────────────────────
-    const callWithRetry = async (msgs) => {
-      let response;
-      const delays = [2000, 5000, 10000];
-      for (let attempt = 0; attempt <= delays.length; attempt++) {
-        response = await callAnthropic(ANTHROPIC_API_KEY, SYSTEM_PROMPT, msgs);
-        if (response.status !== 429) break;
-        if (attempt < delays.length) await sleep(delays[attempt]);
-      }
-      return response;
-    };
-
-    // ── PASS 1: Initial analysis ───────────────────────────────────────────
-    let response = await callWithRetry(messages);
+    // ── PASS 1: Haiku (fast + cheap) ───────────────────────────────────────
+    let response = await callWithRetry(ANTHROPIC_API_KEY, MODEL_FAST, messages);
     let data = await response.json();
 
     if (!response.ok) {
       return {
         statusCode: response.status,
-        body: JSON.stringify({ error: data.error?.message || 'Anthropic API error', details: data.error || data })
+        body: JSON.stringify({ error: data.error?.message || 'API error', details: data.error || data })
       };
     }
 
@@ -256,49 +178,51 @@ Your classification determines the scoring range. Return only the JSON object.`;
     try {
       parsed = JSON.parse(clean);
     } catch {
-      return { statusCode: 500, body: JSON.stringify({ error: 'Failed to parse AI response as JSON.' }) };
+      // Haiku JSON parse failed — fall back to Sonnet
+      console.log('Haiku parse failed, falling back to Sonnet');
+      response = await callWithRetry(ANTHROPIC_API_KEY, MODEL_SMART, messages);
+      data = await response.json();
+      if (!response.ok) {
+        return { statusCode: response.status, body: JSON.stringify({ error: 'Fallback API error' }) };
+      }
+      raw = data.content?.[0]?.text || '';
+      clean = raw.replace(/```json\n?|```/g, '').trim();
+      try {
+        parsed = JSON.parse(clean);
+      } catch {
+        return { statusCode: 500, body: JSON.stringify({ error: 'Failed to parse AI response.' }) };
+      }
     }
 
-    // ── PASS 2: Validate and correct if needed ─────────────────────────────
+    // ── PASS 2: Validate — if score is contradictory, correct with Sonnet ──
     const validation = validateResult(parsed);
 
     if (!validation.valid) {
-      console.log('Score validation failed, requesting correction:', validation.reason);
+      console.log('Validation failed, correcting with Sonnet:', validation.reason);
 
       const correctionMessages = [
         ...messages,
-        {
-          role: 'assistant',
-          content: clean
-        },
+        { role: 'assistant', content: clean },
         {
           role: 'user',
-          content: `SCORING ERROR: ${validation.reason}
-
-Please return a corrected JSON object with appropriate scores. Remember the calibration anchors:
-- Tang dynasty stele rubbing = 9.0–9.5
-- Museum piece with collector seals = 8.5–9.5
-- Student practice = 2.0–6.0
-
-Return ONLY the corrected JSON object.`
+          content: `SCORING ERROR: ${validation.reason} Return corrected JSON only.`
         }
       ];
 
-      const corrResponse = await callWithRetry(correctionMessages);
+      const corrResponse = await callWithRetry(ANTHROPIC_API_KEY, MODEL_SMART, correctionMessages);
       const corrData = await corrResponse.json();
 
       if (corrResponse.ok) {
         const corrRaw = corrData.content?.[0]?.text || '';
         const corrClean = corrRaw.replace(/```json\n?|```/g, '').trim();
-
         try {
           const corrParsed = JSON.parse(corrClean);
           if (corrParsed.overallScore && corrParsed.metrics) {
             parsed = corrParsed;
-            clean = corrClean;
+            clean = JSON.stringify(corrParsed);
           }
         } catch {
-          console.error('Correction parse failed, using original result');
+          console.error('Correction parse failed, using Haiku result');
         }
       }
     }
@@ -306,7 +230,7 @@ Return ONLY the corrected JSON object.`
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'application/json' },
-      body: typeof parsed === 'string' ? clean : JSON.stringify(parsed)
+      body: typeof parsed === 'object' ? JSON.stringify(parsed) : clean
     };
 
   } catch (err) {
