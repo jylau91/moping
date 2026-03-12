@@ -5,10 +5,7 @@ exports.handler = async (event) => {
 
   const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
   if (!OPENAI_API_KEY) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: 'OpenAI API key not configured.' })
-    };
+    return { statusCode: 500, body: JSON.stringify({ error: 'OpenAI API key not configured.' }) };
   }
 
   const MOPING_PASSWORD = process.env.MOPING_PASSWORD;
@@ -58,48 +55,39 @@ The JSON must have exactly these fields:
 - studyRefs: an array of exactly 3 objects, each with: char (single Chinese character), name (master and work title), style (style name), reason (string under 15 words)`;
 
   try {
-    const requestBody = {
-      model: 'gpt-5-mini',
-      instructions: systemPrompt,
-      input: [
-        {
-          role: 'user',
-          content: [
-            {
-              type: 'input_image',
-              image_url: {
-                url: `data:${mediaType};base64,${imageBase64}`,
-                detail: 'low'
-              }
-            },
-            {
-              type: 'input_text',
-              text: `Analyse this Chinese calligraphy for an intermediate student. ${styleHint} Return only the JSON object.`
-            }
-          ]
-        }
-      ]
-    };
-
     const response = await fetch('https://api.openai.com/v1/responses', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${OPENAI_API_KEY}`
       },
-      body: JSON.stringify(requestBody)
+      body: JSON.stringify({
+        model: 'gpt-5-mini',
+        instructions: systemPrompt,
+        input: [
+          {
+            role: 'user',
+            content: [
+              {
+                type: 'input_image',
+                image_url: `data:${mediaType};base64,${imageBase64}`
+              },
+              {
+                type: 'input_text',
+                text: `Analyse this Chinese calligraphy for an intermediate student. ${styleHint} Return only the JSON object.`
+              }
+            ]
+          }
+        ]
+      })
     });
 
     const data = await response.json();
 
     if (!response.ok) {
-      // Return full error details for debugging
       return {
         statusCode: response.status,
-        body: JSON.stringify({
-          error: data.error?.message || 'OpenAI API error',
-          details: data.error || data
-        })
+        body: JSON.stringify({ error: data.error?.message || 'OpenAI API error', details: data.error || data })
       };
     }
 
