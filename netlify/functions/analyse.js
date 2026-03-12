@@ -13,7 +13,7 @@ const callAnthropic = async (apiKey, systemPrompt, finalBase64, styleHint) => {
     },
     body: JSON.stringify({
       model: 'claude-sonnet-4-6',
-      max_tokens: 1500,
+      max_tokens: 2000,
       system: systemPrompt,
       messages: [
         {
