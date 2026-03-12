@@ -933,7 +933,7 @@ function loadFile(file) {
     const img = new Image();
     img.onload = () => {
       // Resize: cap longest side at 1000px
-      const MAX = 600;
+      const MAX = 800;
       let w = img.width, h = img.height;
       if (w > MAX || h > MAX) {
         if (w >= h) { h = Math.round(h * MAX / w); w = MAX; }
