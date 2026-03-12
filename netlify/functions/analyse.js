@@ -166,7 +166,7 @@ JSON SCHEMA — return exactly these fields
       try {
         const inputBuffer = Buffer.from(imageBase64, 'base64');
         const resizedBuffer = await sharp(inputBuffer)
-          .resize(600, 600, { fit: 'inside', withoutEnlargement: true })
+          .resize(800, 800, { fit: 'inside', withoutEnlargement: true })
           .jpeg({ quality: 85 })
           .toBuffer();
         finalBase64 = resizedBuffer.toString('base64');
