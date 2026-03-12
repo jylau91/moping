@@ -58,34 +58,7 @@ The JSON must have exactly these fields:
   const ext = extMap[mediaType] || 'jpg';
   const filename = `calligraphy.${ext}`;
 
-  let fileId = null;
-
   try {
-    // ── Step 1: Upload image to Files API ──────────────────────────────────
-    const imageBuffer = Buffer.from(imageBase64, 'base64');
-
-    const formData = new FormData();
-    formData.append('purpose', 'user_data');
-    formData.append('file', new Blob([imageBuffer], { type: mediaType }), filename);
-
-    const uploadRes = await fetch('https://api.openai.com/v1/files', {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${OPENAI_API_KEY}` },
-      body: formData
-    });
-
-    const uploadData = await uploadRes.json();
-
-    if (!uploadRes.ok) {
-      return {
-        statusCode: uploadRes.status,
-        body: JSON.stringify({ error: 'File upload failed', details: uploadData.error || uploadData })
-      };
-    }
-
-    fileId = uploadData.id;
-
-    // ── Step 2: Call Responses API with file_id ────────────────────────────
     const response = await fetch('https://api.openai.com/v1/responses', {
       method: 'POST',
       headers: {
@@ -101,7 +74,8 @@ The JSON must have exactly these fields:
             content: [
               {
                 type: 'input_file',
-                file_id: fileId
+                filename: filename,
+                file_data: `data:${mediaType};base64,${imageBase64}`
               },
               {
                 type: 'input_text',
@@ -138,13 +112,5 @@ The JSON must have exactly these fields:
       statusCode: 500,
       body: JSON.stringify({ error: err.message })
     };
-  } finally {
-    // ── Step 3: Delete uploaded file (fire-and-forget) ────────────────────
-    if (fileId) {
-      fetch(`https://api.openai.com/v1/files/${fileId}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${OPENAI_API_KEY}` }
-      }).catch(() => {});
-    }
   }
 };
