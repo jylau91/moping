@@ -54,12 +54,8 @@ The JSON must have exactly these fields:
 - intermediateChar: a single Chinese character relevant to the work
 - studyRefs: an array of exactly 3 objects, each with: char (single Chinese character), name (master and work title), style (style name), reason (string under 15 words)`;
 
-  const extMap = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' };
-  const ext = extMap[mediaType] || 'jpg';
-  const filename = `calligraphy.${ext}`;
-
   try {
-    const response = await fetch('https://api.openai.com/v1/responses', {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -67,18 +63,24 @@ The JSON must have exactly these fields:
       },
       body: JSON.stringify({
         model: 'gpt-4o-mini',
-        instructions: systemPrompt,
-        input: [
+        max_tokens: 2000,
+        messages: [
+          {
+            role: 'system',
+            content: systemPrompt
+          },
           {
             role: 'user',
             content: [
               {
-                type: 'input_file',
-                filename: filename,
-                file_data: `data:${mediaType};base64,${imageBase64}`
+                type: 'image_url',
+                image_url: {
+                  url: `data:${mediaType};base64,${imageBase64}`,
+                  detail: 'high'
+                }
               },
               {
-                type: 'input_text',
+                type: 'text',
                 text: `Analyse this Chinese calligraphy for an intermediate student. ${styleHint} Return only the JSON object.`
               }
             ]
@@ -96,7 +98,7 @@ The JSON must have exactly these fields:
       };
     }
 
-    const raw = data.output?.[0]?.content?.[0]?.text || '';
+    const raw = data.choices?.[0]?.message?.content || '';
     const clean = raw.replace(/```json\n?|```/g, '').trim();
 
     JSON.parse(clean); // validate JSON
