@@ -72,7 +72,7 @@ The JSON must have exactly these fields:
         'X-GitHub-Api-Version': '2022-11-28'
       },
       body: JSON.stringify({
-        model: 'openai/gpt-4o mini',
+        model: 'openai/gpt-4o-mini',
         max_tokens: 1500,
         messages: [
           {
