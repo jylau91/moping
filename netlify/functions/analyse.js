@@ -72,7 +72,7 @@ The JSON must have exactly these fields:
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model: 'claude-haiku-4-5',
+        model: 'claude-sonnet-4-6',
         max_tokens: 1500,
         system: systemPrompt,
         messages: [{
@@ -82,62 +82,6 @@ The JSON must have exactly these fields:
             { type: 'text', text: `Analyse this Chinese calligraphy for an intermediate student. ${styleHint} Return only the JSON object.` }
           ]
         }]
-      })
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      return {
-        statusCode: response.status,
-        body: JSON.stringify({ error: data.error?.message || 'Anthropic API error' })
-      };
-    }
-
-    const raw = data.content?.find(b => b.type === 'text')?.text || '';
-    const clean = raw.replace(/```json\n?|```/g, '').trim();
-
-    JSON.parse(clean);
-
-    return {
-      statusCode: 200,
-      headers: { 'Content-Type': 'application/json' },
-      body: clean
-    };
-
-  } catch (err) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: err.message })
-    };
-      })
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      return {
-        statusCode: response.status,
-        body: JSON.stringify({ error: data.error?.message || 'Anthropic API error' })
-      };
-    }
-
-    const raw = data.content?.find(b => b.type === 'text')?.text || '';
-    const clean = raw.replace(/```json\n?|```/g, '').trim();
-
-    JSON.parse(clean);
-
-    return {
-      statusCode: 200,
-      headers: { 'Content-Type': 'application/json' },
-      body: clean
-    };
-
-  } catch (err) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: err.message })
-    };
       })
     });
 
