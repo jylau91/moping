@@ -50,7 +50,6 @@ body::after {
   pointer-events:none; z-index:0;
 }
 
-/* ═══════════════════ NAV ═══════════════════ */
 nav {
   position:relative; z-index:100;
   display:flex; align-items:center;
@@ -154,11 +153,9 @@ nav {
   min-width:2.2rem; text-align:center;
 }
 
-/* ═══════════════════ PAGES ═══════════════════ */
 .page { display:none; position:relative; z-index:10; }
 .page.active { display:block; }
 
-/* ═══════════════════ ANALYSE PAGE ═══════════════════ */
 #page-analyse {
   display:none;
   grid-template-columns: minmax(340px,420px) 1fr;
@@ -166,7 +163,6 @@ nav {
 }
 #page-analyse.active { display:grid; }
 
-/* --- Left column --- */
 .col-upload {
   border-right:1px solid var(--border);
   display:flex; flex-direction:column;
@@ -239,7 +235,6 @@ nav {
 }
 .btn-ghost:hover { border-color:var(--gold); color:var(--gold); }
 
-/* Style selector */
 .style-sel { width:100%; display:none; }
 .field-label {
   font-size:.7rem; color:var(--text-soft);
@@ -255,7 +250,6 @@ nav {
 }
 .chip:hover,.chip.on { border-color:var(--gold); color:var(--gold); background:rgba(176,125,42,0.08); }
 
-/* Notes input */
 .notes-wrap { width:100%; display:none; }
 .notes-input {
   width:100%; background:var(--bg-card);
@@ -267,9 +261,7 @@ nav {
 .notes-input::placeholder { color:var(--text-mute); }
 .notes-input:focus { outline:none; border-color:var(--gold); box-shadow: 0 0 0 3px rgba(176,125,42,0.1); }
 
-.pw-row {
-  display:flex; gap:.4rem; align-items:stretch;
-}
+.pw-row { display:flex; gap:.4rem; align-items:stretch; }
 .pw-input { flex:1; margin-bottom:0; }
 .pw-toggle {
   background:var(--bg-card); border:1px solid var(--border);
@@ -284,7 +276,6 @@ nav {
   font-family:'Noto Sans SC',sans-serif;
 }
 
-/* Analyse button */
 .analyse-btn {
   width:100%; padding:.9rem;
   background: var(--vermillion); border:none;
@@ -299,7 +290,6 @@ nav {
 
 #fileInput { display:none; }
 
-/* --- Right column: results --- */
 .col-results {
   overflow-y:auto;
   max-height:calc(100vh - var(--nav-h));
@@ -309,29 +299,22 @@ nav {
 .col-results::-webkit-scrollbar { width:4px; }
 .col-results::-webkit-scrollbar-thumb { background:var(--border-mid); border-radius:2px; }
 
-/* Empty */
 .results-empty {
   height:100%; min-height:400px;
   display:flex; flex-direction:column;
   align-items:center; justify-content:center;
   gap:1.5rem; opacity:.35;
 }
-.empty-glyph {
-  font-family:'Noto Serif SC',serif; font-size:9rem;
-  color:var(--text-mute); line-height:1;
-}
+.empty-glyph { font-family:'Noto Serif SC',serif; font-size:9rem; color:var(--text-mute); line-height:1; }
 .empty-text { font-size:1rem; color:var(--text-soft); letter-spacing:.08em; text-align:center; }
 
-/* Loading */
 .results-loading {
   height:100%; min-height:400px;
   display:none; flex-direction:column;
   align-items:center; justify-content:center;
   gap:2rem;
 }
-.spinner {
-  width:64px; height:64px; position:relative;
-}
+.spinner { width:64px; height:64px; position:relative; }
 .spinner::before,.spinner::after {
   content:''; position:absolute; border-radius:50%;
   border:2px solid transparent;
@@ -348,7 +331,6 @@ nav {
 @keyframes breathe { 0%,100%{opacity:.3} 50%{opacity:1} }
 .loading-msg { font-size:.78rem; color:var(--text-mute); letter-spacing:.2em; }
 
-/* Error */
 .results-error {
   height:100%; min-height:400px;
   display:none; flex-direction:column;
@@ -358,10 +340,9 @@ nav {
 .error-icon { font-size:2.5rem; }
 .error-text { font-size:.9rem; color:var(--text-soft); max-width:320px; line-height:1.7; }
 
-/* Results content */
 .results-body { display:none; }
 
-/* ═══ Attribution Banner (NEW) ═══ */
+/* Attribution Banner */
 .attribution-banner {
   display:none;
   padding:1rem 1.3rem;
@@ -373,10 +354,7 @@ nav {
   animation: riseIn .6s ease-out .05s both;
 }
 .attribution-banner.visible { display:block; }
-.attr-source-row {
-  display:flex; align-items:center; gap:.6rem;
-  margin-bottom:.5rem;
-}
+.attr-source-row { display:flex; align-items:center; gap:.6rem; margin-bottom:.5rem; }
 .attr-source-badge {
   display:inline-flex; align-items:center; gap:.3rem;
   padding:.2rem .7rem;
@@ -390,24 +368,15 @@ nav {
 .attr-source-badge .attr-icon { font-size:.75rem; }
 .attr-master-name {
   font-family:'Noto Serif SC',serif;
-  font-size:1.15rem;
-  color:var(--text);
-  font-weight:700;
-  line-height:1.3;
+  font-size:1.15rem; color:var(--text); font-weight:700; line-height:1.3;
 }
 .attr-work-name {
   font-family:'Noto Serif SC',serif;
-  font-size:.88rem;
-  color:var(--gold-dim);
-  font-style:italic;
-  margin-top:.15rem;
+  font-size:.88rem; color:var(--gold-dim); font-style:italic; margin-top:.15rem;
 }
 .attr-note {
-  font-size:.78rem;
-  color:var(--text-soft);
-  margin-top:.4rem;
-  line-height:1.6;
-  font-style:italic;
+  font-size:.78rem; color:var(--text-soft);
+  margin-top:.4rem; line-height:1.6; font-style:italic;
 }
 
 /* Score hero */
@@ -424,26 +393,15 @@ nav {
   border-radius:50%;
   border:2px solid var(--border-mid);
   display:flex; flex-direction:column; align-items:center; justify-content:center;
-  flex-shrink:0;
-  position:relative;
-  background: var(--bg-card);
-  box-shadow: var(--shadow);
+  flex-shrink:0; position:relative;
+  background: var(--bg-card); box-shadow: var(--shadow);
 }
-.score-dial::after {
-  content:''; position:absolute; inset:6px;
-  border-radius:50%; border:1px solid var(--border);
-}
-.score-val {
-  font-family:'Cinzel Decorative',serif; font-size:2.2rem;
-  color:var(--gold); line-height:1; z-index:1;
-}
+.score-dial::after { content:''; position:absolute; inset:6px; border-radius:50%; border:1px solid var(--border); }
+.score-val { font-family:'Cinzel Decorative',serif; font-size:2.2rem; color:var(--gold); line-height:1; z-index:1; }
 .score-ten { font-size:.65rem; color:var(--text-mute); z-index:1; letter-spacing:.1em; }
 
 .score-info { flex:1; }
-.score-grade {
-  font-family:'Noto Serif SC',serif; font-size:2rem;
-  color:var(--vermillion); margin-bottom:.4rem;
-}
+.score-grade { font-family:'Noto Serif SC',serif; font-size:2rem; color:var(--vermillion); margin-bottom:.4rem; }
 .score-style {
   display:inline-block;
   border:1px solid var(--border-mid);
@@ -467,12 +425,10 @@ nav {
 .level-badge.grandmaster {
   border-color:rgba(176,125,42,0.6);
   background: linear-gradient(135deg, rgba(176,125,42,0.15), rgba(192,57,43,0.08));
-  color:var(--gold-dim);
-  font-weight:500;
+  color:var(--gold-dim); font-weight:500;
 }
 .level-badge.novice { border-color:rgba(192,57,43,0.3); background:rgba(192,57,43,0.06); color:var(--vermillion); }
 
-/* Section heading */
 .sec-head {
   font-family:'Cinzel Decorative',serif;
   font-size:.72rem; letter-spacing:.22em;
@@ -482,18 +438,14 @@ nav {
 }
 .sec-head::after { content:''; flex:1; height:1px; background:var(--border); }
 
-/* Metrics */
 .metrics-grid {
   display:grid; grid-template-columns:1fr 1fr;
   gap:.7rem; margin-bottom:2rem;
   animation:riseIn .6s ease-out .12s both;
 }
 .metric-card {
-  border:1px solid var(--border);
-  border-radius:8px; padding:.9rem 1rem;
-  background:var(--bg-card);
-  transition:all .2s;
-  box-shadow: var(--shadow);
+  border:1px solid var(--border); border-radius:8px; padding:.9rem 1rem;
+  background:var(--bg-card); transition:all .2s; box-shadow: var(--shadow);
 }
 .metric-card:hover { border-color:var(--gold); transform:translateY(-1px); box-shadow:0 4px 16px rgba(45,37,32,0.1); }
 .metric-row { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:.45rem; }
@@ -504,23 +456,19 @@ nav {
 .metric-fill { height:100%; border-radius:2px; background:linear-gradient(90deg,var(--gold),var(--vermillion)); width:0; transition:width 1.1s ease-out; }
 .metric-note { font-size:.78rem; color:var(--text-soft); line-height:1.5; font-style:italic; }
 
-/* Improvements */
 .impr-list { display:flex; flex-direction:column; gap:.75rem; margin-bottom:2rem; animation:riseIn .6s ease-out .24s both; }
 .impr-card {
   display:flex; gap:.9rem; padding:1rem 1.1rem;
   border:1px solid var(--border);
   border-left:3px solid var(--vermillion);
   border-radius:0 8px 8px 0;
-  background:var(--bg-card);
-  transition:all .2s;
-  box-shadow: var(--shadow);
+  background:var(--bg-card); transition:all .2s; box-shadow: var(--shadow);
 }
 .impr-card:hover { background:var(--bg-hover); border-color:var(--border-mid); border-left-color:var(--verm-glow); }
 .impr-num { font-family:'Cinzel Decorative',serif; font-size:1.1rem; color:var(--vermillion); flex-shrink:0; line-height:1.1; }
 .impr-title { font-size:.9rem; color:var(--text); margin-bottom:.25rem; font-weight:500; }
 .impr-desc { font-size:.82rem; color:var(--text-soft); line-height:1.65; font-style:italic; }
 
-/* Strengths */
 .str-list { display:flex; flex-wrap:wrap; gap:.45rem; margin-bottom:2rem; animation:riseIn .6s ease-out .36s both; }
 .str-tag {
   padding:.3rem .9rem;
@@ -530,24 +478,19 @@ nav {
   font-family:'Noto Sans SC',sans-serif;
 }
 
-/* Intermediate tips */
 .tips-box {
   padding:1.2rem 1.4rem; border:1px solid var(--border);
   border-radius:8px; background:var(--bg-card);
-  margin-bottom:2rem;
-  animation:riseIn .6s ease-out .48s both;
-  box-shadow: var(--shadow);
+  margin-bottom:2rem; animation:riseIn .6s ease-out .48s both; box-shadow: var(--shadow);
 }
 .tips-inner { font-size:.88rem; color:var(--text-mid); line-height:1.8; }
 .tips-char { font-family:'Noto Serif SC',serif; font-size:2.8rem; color:rgba(176,125,42,0.2); float:right; margin:0 0 .5rem .8rem; line-height:1; }
 
-/* Study references */
 .refs-list { display:flex; flex-direction:column; gap:.5rem; margin-bottom:2rem; animation:riseIn .6s ease-out .6s both; }
 .ref-item {
   display:flex; align-items:center; gap:.8rem; padding:.7rem .9rem;
   border:1px solid var(--border); border-radius:8px;
-  background:var(--bg-card); transition:all .2s;
-  box-shadow: var(--shadow);
+  background:var(--bg-card); transition:all .2s; box-shadow: var(--shadow);
 }
 .ref-item:hover { border-color:var(--gold); background:var(--bg-hover); }
 .ref-char { font-family:'Noto Serif SC',serif; font-size:1.4rem; color:var(--gold); width:32px; text-align:center; flex-shrink:0; }
@@ -561,26 +504,19 @@ nav {
   font-family:'Noto Sans SC',sans-serif; white-space:nowrap;
 }
 
-/* ═══════════════════ HISTORY PAGE ═══════════════════ */
+/* History */
 #page-history { padding:2.5rem 3rem; min-height:calc(100vh - var(--nav-h)); background:var(--bg); }
-
 .history-head {
   display:flex; justify-content:space-between; align-items:flex-end;
-  margin-bottom:2rem;
-  padding-bottom:1.2rem;
-  border-bottom:1px solid var(--border);
+  margin-bottom:2rem; padding-bottom:1.2rem; border-bottom:1px solid var(--border);
 }
 .history-title { font-family:'Cinzel Decorative',serif; font-size:1.3rem; color:var(--text); }
 .history-subtitle { font-size:.82rem; color:var(--text-soft); margin-top:.3rem; letter-spacing:.05em; }
 
-/* Progress chart */
 .progress-chart-wrap {
-  margin-bottom:2.5rem;
-  background:var(--bg-card);
-  border:1px solid var(--border);
-  border-radius:8px;
-  padding:1.5rem;
-  box-shadow: var(--shadow);
+  margin-bottom:2.5rem; background:var(--bg-card);
+  border:1px solid var(--border); border-radius:8px;
+  padding:1.5rem; box-shadow: var(--shadow);
 }
 .chart-title { font-family:'Cinzel Decorative',serif; font-size:.75rem; color:var(--text-soft); letter-spacing:.15em; margin-bottom:1.2rem; }
 .chart-area { position:relative; height:120px; display:flex; align-items:flex-end; gap:.4rem; }
@@ -596,7 +532,6 @@ nav {
 .chart-label { font-size:.6rem; color:var(--text-mute); text-align:center; font-family:'Noto Sans SC',sans-serif; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; }
 .chart-score-label { font-size:.65rem; color:var(--gold); font-family:'Cinzel Decorative',serif; }
 
-/* History empty */
 .history-empty {
   display:flex; flex-direction:column; align-items:center; justify-content:center;
   min-height:300px; gap:1.5rem; opacity:.4;
@@ -604,46 +539,26 @@ nav {
 .history-empty-char { font-family:'Noto Serif SC',serif; font-size:6rem; color:var(--text-mute); line-height:1; }
 .history-empty-text { font-size:.95rem; color:var(--text-soft); text-align:center; letter-spacing:.05em; }
 
-/* History grid */
 .history-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:1.2rem; }
-
 .history-card {
-  border:1px solid var(--border);
-  border-radius:10px; overflow:hidden;
-  background:var(--bg-card);
-  transition:all .25s;
-  cursor:pointer;
-  animation:riseIn .4s ease-out both;
-  box-shadow: var(--shadow);
+  border:1px solid var(--border); border-radius:10px; overflow:hidden;
+  background:var(--bg-card); transition:all .25s; cursor:pointer;
+  animation:riseIn .4s ease-out both; box-shadow: var(--shadow);
 }
 .history-card:hover { border-color:var(--gold); transform:translateY(-2px); box-shadow:0 8px 24px rgba(45,37,32,0.12); }
-
-.history-card-img {
-  width:100%; height:160px;
-  object-fit:contain; object-position:center;
-  background:var(--bg-mid);
-  display:block;
-}
+.history-card-img { width:100%; height:160px; object-fit:contain; object-position:center; background:var(--bg-mid); display:block; }
 .history-card-body { padding:.9rem 1rem; }
 .history-card-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:.5rem; }
 .history-card-date { font-size:.7rem; color:var(--text-mute); letter-spacing:.08em; font-family:'Noto Sans SC',sans-serif; }
 .history-card-score { font-family:'Cinzel Decorative',serif; font-size:1.2rem; color:var(--gold); }
 .history-card-grade { font-family:'Noto Serif SC',serif; font-size:1.1rem; color:var(--vermillion); margin-bottom:.35rem; }
 .history-card-style {
-  display:inline-block;
-  border:1px solid var(--border-mid); color:var(--gold);
+  display:inline-block; border:1px solid var(--border-mid); color:var(--gold);
   padding:.12rem .5rem; font-size:.65rem; letter-spacing:.12em;
-  border-radius:20px; margin-bottom:.5rem;
-  font-family:'Noto Sans SC',sans-serif;
+  border-radius:20px; margin-bottom:.5rem; font-family:'Noto Sans SC',sans-serif;
   background:rgba(176,125,42,0.08);
 }
-.history-card-attr {
-  display:block;
-  font-family:'Noto Serif SC',serif;
-  font-size:.75rem; color:var(--gold-dim);
-  margin-bottom:.4rem;
-  font-style:italic;
-}
+.history-card-attr { display:block; font-family:'Noto Serif SC',serif; font-size:.75rem; color:var(--gold-dim); margin-bottom:.4rem; font-style:italic; }
 .history-card-summary { font-size:.8rem; color:var(--text-soft); line-height:1.55; font-style:italic; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
 .history-card-actions { display:flex; gap:.5rem; margin-top:.7rem; padding-top:.7rem; border-top:1px solid var(--border); }
 .history-card-notes { font-size:.72rem; color:var(--jade); font-style:italic; margin-top:.3rem; }
@@ -656,28 +571,19 @@ nav {
 }
 .btn-clear-hist:hover { border-color:var(--vermillion); color:var(--vermillion); background:rgba(192,57,43,0.05); }
 
-/* Comparison mini-metric bars in history */
 .mini-metrics { display:flex; gap:.3rem; margin-top:.6rem; }
 .mini-m { flex:1; }
 .mini-m-label { font-size:.55rem; color:var(--text-mute); text-align:center; margin-bottom:.2rem; font-family:'Noto Sans SC',sans-serif; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .mini-m-bar { height:3px; background:var(--border); border-radius:1px; overflow:hidden; }
 .mini-m-fill { height:100%; background:linear-gradient(90deg,var(--gold),var(--vermillion)); transition:width 1s ease-out; width:0; }
 
-/* Scroll */
-#page-history::-webkit-scrollbar { width:4px; }
-
-/* Decorative side text */
 .side-deco {
-  position:fixed; right:.8rem; top:50%;
-  transform:translateY(-50%);
-  writing-mode:vertical-rl;
-  font-family:'Noto Serif SC',serif; font-size:.65rem;
+  position:fixed; right:.8rem; top:50%; transform:translateY(-50%);
+  writing-mode:vertical-rl; font-family:'Noto Serif SC',serif; font-size:.65rem;
   color:rgba(176,125,42,0.15); letter-spacing:.35em;
-  pointer-events:none; z-index:5;
-  user-select:none;
+  pointer-events:none; z-index:5; user-select:none;
 }
 
-/* Modal */
 .modal-overlay {
   display:none; position:fixed; inset:0; z-index:200;
   background:rgba(18,13,8,0.92); backdrop-filter:blur(4px);
@@ -687,8 +593,7 @@ nav {
 .modal-box {
   background:var(--bg-card); border:1px solid var(--border);
   border-radius:8px; padding:2rem; max-width:680px; width:100%;
-  max-height:80vh; overflow-y:auto;
-  position:relative;
+  max-height:80vh; overflow-y:auto; position:relative;
   box-shadow: 0 16px 48px rgba(18,13,8,0.4);
 }
 .modal-close {
@@ -703,82 +608,38 @@ nav {
 .modal-score-row { display:flex; align-items:center; gap:1rem; margin-bottom:1rem; flex-wrap:wrap; }
 .modal-score-big { font-family:'Cinzel Decorative',serif; font-size:2.5rem; color:var(--gold); }
 .modal-grade { font-family:'Noto Serif SC',serif; font-size:1.5rem; color:var(--vermillion); }
-
-/* Modal attribution */
 .modal-attr-banner {
-  display:none;
-  padding:.8rem 1rem;
-  border:1px solid rgba(176,125,42,0.3);
-  border-left:3px solid var(--gold);
-  border-radius:0 6px 6px 0;
-  background: rgba(176,125,42,0.05);
-  margin-bottom:1.2rem;
+  display:none; padding:.8rem 1rem;
+  border:1px solid rgba(176,125,42,0.3); border-left:3px solid var(--gold);
+  border-radius:0 6px 6px 0; background: rgba(176,125,42,0.05); margin-bottom:1.2rem;
 }
 .modal-attr-banner.visible { display:block; }
-.modal-attr-text {
-  font-family:'Noto Serif SC',serif;
-  font-size:.85rem; color:var(--text);
-  line-height:1.5;
-}
-.modal-attr-source {
-  font-size:.7rem; color:var(--gold-dim);
-  font-family:'Noto Sans SC',sans-serif;
-  margin-top:.3rem;
-}
+.modal-attr-text { font-family:'Noto Serif SC',serif; font-size:.85rem; color:var(--text); line-height:1.5; }
+.modal-attr-source { font-size:.7rem; color:var(--gold-dim); font-family:'Noto Sans SC',sans-serif; margin-top:.3rem; }
 
 @media(max-width:768px){
-  nav {
-    padding: 0 1rem;
-    height: auto;
-    min-height: var(--nav-h);
-    flex-wrap: wrap;
-    gap: .5rem;
-    padding-top: .5rem;
-    padding-bottom: .5rem;
-  }
-  .nav-brand { flex: 1 1 auto; min-width: 0; }
-  .brand-sub { display: none; }
-  .brand-en { font-size: .75rem; }
-  .nav-tabs { order: 3; width: 100%; justify-content: center; }
-  .font-size-ctrl { order: 2; }
-
-  #page-analyse.active {
-    display: flex;
-    flex-direction: column;
-    min-height: unset;
-  }
-  .col-upload {
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-    padding: 1.2rem 1rem;
-    width: 100%;
-  }
-  .upload-zone { aspect-ratio: 4/3; }
-  .col-results {
-    max-height: none;
-    overflow-y: visible;
-    padding: 1.5rem 1rem;
-    width: 100%;
-  }
-
-  .score-hero { flex-direction: column; align-items: center; text-align: center; gap: 1rem; }
-  .score-info { width: 100%; }
-
-  .metrics-grid { grid-template-columns: 1fr; }
-
-  #page-history { padding: 1.2rem 1rem; }
-  .history-grid { grid-template-columns: 1fr; }
-  .history-head { flex-direction: column; align-items: flex-start; gap: .5rem; }
-
-  .modal-content { margin: 1rem; padding: 1.2rem; }
-
-  .side-deco { display: none; }
+  nav { padding:0 1rem; height:auto; min-height:var(--nav-h); flex-wrap:wrap; gap:.5rem; padding-top:.5rem; padding-bottom:.5rem; }
+  .nav-brand { flex:1 1 auto; min-width:0; }
+  .brand-sub { display:none; }
+  .brand-en { font-size:.75rem; }
+  .nav-tabs { order:3; width:100%; justify-content:center; }
+  .font-size-ctrl { order:2; }
+  #page-analyse.active { display:flex; flex-direction:column; min-height:unset; }
+  .col-upload { border-right:none; border-bottom:1px solid var(--border); padding:1.2rem 1rem; width:100%; }
+  .upload-zone { aspect-ratio:4/3; }
+  .col-results { max-height:none; overflow-y:visible; padding:1.5rem 1rem; width:100%; }
+  .score-hero { flex-direction:column; align-items:center; text-align:center; gap:1rem; }
+  .score-info { width:100%; }
+  .metrics-grid { grid-template-columns:1fr; }
+  #page-history { padding:1.2rem 1rem; }
+  .history-grid { grid-template-columns:1fr; }
+  .history-head { flex-direction:column; align-items:flex-start; gap:.5rem; }
+  .side-deco { display:none; }
 }
-
 @media(max-width:480px){
-  .font-size-ctrl { display: none; }
-  .nav-tabs { gap: .15rem; }
-  .nav-tab { padding: .35rem .7rem; font-size: .7rem; }
+  .font-size-ctrl { display:none; }
+  .nav-tabs { gap:.15rem; }
+  .nav-tab { padding:.35rem .7rem; font-size:.7rem; }
 }
 </style>
 </head>
@@ -786,7 +647,6 @@ nav {
 
 <div class="side-deco">筆墨丹青 · 書法藝術 · 揮毫潑墨 · 中鋒側鋒</div>
 
-<!-- ═══ NAV ═══ -->
 <nav>
   <div class="nav-brand">
     <div class="brand-seal">墨</div>
@@ -809,12 +669,8 @@ nav {
   </div>
 </nav>
 
-<!-- ═══ PAGE: ANALYSE ═══ -->
 <div class="page active" id="page-analyse">
-
-  <!-- Left: upload -->
   <div class="col-upload">
-
     <div class="upload-zone" id="uploadZone">
       <div class="upload-placeholder" id="upPlaceholder">
         <div class="upload-glyph">書</div>
@@ -861,13 +717,10 @@ nav {
     </div>
 
     <button class="analyse-btn" id="analyseBtn" onclick="doAnalyse()">✦ Analyse ✦</button>
-
     <input type="file" id="fileInput" accept="image/*">
   </div>
 
-  <!-- Right: results -->
   <div class="col-results" id="colResults">
-
     <div class="results-empty" id="resEmpty">
       <div class="empty-glyph">評</div>
       <p class="empty-text">Upload a calligraphy image<br>to receive your assessment</p>
@@ -881,20 +734,18 @@ nav {
 
     <div class="results-error" id="resError">
       <div class="error-icon">⊘</div>
-      <p class="error-text" id="errorTxt">Unable to analyse image. Please ensure it clearly shows calligraphy work.</p>
+      <p class="error-text" id="errorTxt">Unable to analyse image.</p>
       <button class="btn-ghost" onclick="setState('empty')">Try Again</button>
     </div>
 
     <div class="results-body" id="resBody">
-
-      <!-- Attribution banner (shown for historical works) -->
       <div class="attribution-banner" id="attrBanner">
         <div class="attr-source-row">
           <span class="attr-source-badge"><span class="attr-icon">碑</span> <span id="attrSourceType">—</span></span>
         </div>
         <div class="attr-master-name" id="attrMasterName"></div>
         <div class="attr-work-name" id="attrWorkName"></div>
-        <div class="attr-note" id="attrNote">This is a historical masterwork. Scores reflect the quality of the original calligraphy.</div>
+        <div class="attr-note" id="attrNote"></div>
       </div>
 
       <div class="score-hero">
@@ -926,12 +777,10 @@ nav {
 
       <p class="sec-head">Recommended Study 推薦參考</p>
       <div class="refs-list" id="refsList"></div>
-
     </div>
   </div>
 </div>
 
-<!-- ═══ PAGE: HISTORY ═══ -->
 <div class="page" id="page-history">
   <div class="history-head">
     <div>
@@ -940,21 +789,17 @@ nav {
     </div>
     <button class="btn-clear-hist" id="clearHistBtn" onclick="clearHistory()" style="display:none">✕ Clear All</button>
   </div>
-
   <div id="histEmpty" class="history-empty">
     <div class="history-empty-char">記</div>
     <p class="history-empty-text">No sessions yet.<br>Analyse some calligraphy to begin tracking progress.</p>
   </div>
-
   <div id="progressChartWrap" class="progress-chart-wrap" style="display:none">
     <div class="chart-title">Score Progression</div>
     <div class="chart-area" id="progressChart"></div>
   </div>
-
   <div class="history-grid" id="histGrid"></div>
 </div>
 
-<!-- ═══ MODAL ═══ -->
 <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
   <div class="modal-box" id="modalBox">
     <button class="modal-close" onclick="document.getElementById('modalOverlay').classList.remove('open')">✕</button>
@@ -963,9 +808,7 @@ nav {
 </div>
 
 <script>
-// ══════════════════════════════
-// FONT SIZE CONTROL
-// ══════════════════════════════
+/* ── Font size ── */
 let baseFontSize = parseInt(localStorage.getItem('mopingFontSize') || '31');
 function applyFont(size) {
   baseFontSize = Math.min(48, Math.max(16, size));
@@ -976,17 +819,13 @@ function applyFont(size) {
 function adjustFont(delta) { applyFont(baseFontSize + delta * 2); }
 applyFont(baseFontSize);
 
-// ══════════════════════════════
-// STATE
-// ══════════════════════════════
+/* ── State ── */
 let imgBase64 = null;
 let imgMediaType = 'image/jpeg';
 let selectedStyle = 'auto';
 let history = JSON.parse(localStorage.getItem('mopingHistory') || '[]');
 
-// ══════════════════════════════
-// NAVIGATION
-// ══════════════════════════════
+/* ── Nav ── */
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
@@ -995,9 +834,7 @@ function showPage(id) {
   if (id === 'history') renderHistory();
 }
 
-// ══════════════════════════════
-// UPLOAD
-// ══════════════════════════════
+/* ── Upload ── */
 const zone = document.getElementById('uploadZone');
 const fileInput = document.getElementById('fileInput');
 
@@ -1017,7 +854,9 @@ function loadFile(file) {
   r.onload = e => {
     const img = new Image();
     img.onload = () => {
-      const MAX = 800;
+      // ── COST OPTIMISATION: cap at 600px (was 800px) ──
+      // Saves ~35% on image tokens with negligible quality loss for calligraphy
+      const MAX = 600;
       let w = img.width, h = img.height;
       if (w > MAX || h > MAX) {
         if (w >= h) { h = Math.round(h * MAX / w); w = MAX; }
@@ -1026,7 +865,7 @@ function loadFile(file) {
       const canvas = document.createElement('canvas');
       canvas.width = w; canvas.height = h;
       canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-      const resized = canvas.toDataURL(imgMediaType, 0.85);
+      const resized = canvas.toDataURL('image/jpeg', 0.80);
       imgBase64 = resized.split(',')[1];
       document.getElementById('previewImg').src = resized;
       zone.style.display = 'none';
@@ -1062,9 +901,7 @@ document.querySelectorAll('.chip').forEach(c => {
   });
 });
 
-// ══════════════════════════════
-// RESULT STATES
-// ══════════════════════════════
+/* ── States ── */
 function setState(s) {
   document.getElementById('resEmpty').style.display   = s==='empty'   ? 'flex'  : 'none';
   document.getElementById('resLoading').style.display = s==='loading' ? 'flex'  : 'none';
@@ -1072,91 +909,62 @@ function setState(s) {
   document.getElementById('resBody').style.display    = s==='results' ? 'block' : 'none';
 }
 
-// ══════════════════════════════
-// HELPERS
-// ══════════════════════════════
-
-// Check if a result is a historical/masterwork piece (not student practice)
+/* ── Helpers ── */
 function isHistorical(r) {
   const st = (r.sourceType || '').toLowerCase();
   return st.includes('stone') || st.includes('拓片') || st.includes('rubbing')
     || st.includes('copybook') || st.includes('字帖')
-    || st.includes('墨跡') || st.includes('original ink');
+    || st.includes('墨跡') || st.includes('historical');
 }
 
-// Parse attribution into master name and work name
 function parseAttribution(attr) {
   if (!attr) return { master: null, work: null };
-  // Patterns: "歐陽詢 Ouyang Xun — 九成宮醴泉銘" or "in the style of 顏真卿" or just "王羲之"
   const dashSplit = attr.split(/\s*[—–-]\s*/);
-  if (dashSplit.length >= 2) {
-    return { master: dashSplit[0].trim(), work: dashSplit.slice(1).join(' — ').trim() };
-  }
-  // "in the style of X" or "attributed to X"
+  if (dashSplit.length >= 2) return { master: dashSplit[0].trim(), work: dashSplit.slice(1).join(' — ').trim() };
   const styleOf = attr.match(/(?:in the style of|attributed to)\s+(.+)/i);
   if (styleOf) return { master: styleOf[1].trim(), work: null };
   return { master: attr.trim(), work: null };
 }
 
-// Source type icon mapping
 function sourceIcon(st) {
   if (!st) return '書';
   const s = st.toLowerCase();
   if (s.includes('stone') || s.includes('拓片')) return '碑';
   if (s.includes('rubbing') || s.includes('翻印')) return '拓';
   if (s.includes('copybook') || s.includes('字帖')) return '帖';
-  if (s.includes('墨跡') || s.includes('original')) return '墨';
+  if (s.includes('墨跡') || s.includes('original') || s.includes('historical')) return '墨';
   return '習';
 }
 
-// ══════════════════════════════
-// ANALYSE
-// ══════════════════════════════
+/* ── Analyse ── */
 async function doAnalyse() {
   if (!imgBase64) return;
   const btn = document.getElementById('analyseBtn');
   const pwError = document.getElementById('pwError');
   const password = document.getElementById('pwInput').value;
   pwError.textContent = '';
-
   btn.disabled = true; btn.textContent = 'Reading strokes…';
   setState('loading');
-
   try {
     const res = await fetch('/api/analyse', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        imageBase64: imgBase64,
-        mediaType: imgMediaType,
-        style: selectedStyle,
-        password
-      })
+      body: JSON.stringify({ imageBase64: imgBase64, mediaType: imgMediaType, style: selectedStyle, password })
     });
-
     const data = await res.json();
-
     if (res.status === 401) {
       pwError.textContent = '⚠ ' + (data.error || 'Incorrect password.');
-      setState('empty');
-      btn.disabled = false; btn.textContent = '✦ Analyse ✦';
-      return;
+      setState('empty'); btn.disabled = false; btn.textContent = '✦ Analyse ✦'; return;
     }
-
     if (!res.ok) throw new Error(data.error || `Server error ${res.status}`);
-
     renderResult(data);
     saveToHistory(data);
     setState('results');
-
   } catch(err) {
     console.error(err);
-    document.getElementById('errorTxt').textContent =
-      err.message.includes('parse') ? 'Could not parse analysis. Please try again.' : `Error: ${err.message}`;
+    document.getElementById('errorTxt').textContent = err.message.includes('parse') ? 'Could not parse analysis. Please try again.' : `Error: ${err.message}`;
     setState('error');
-  } finally {
-    btn.disabled = false; btn.textContent = '✦ Analyse ✦';
-  }
+  } finally { btn.disabled = false; btn.textContent = '✦ Analyse ✦'; }
 }
 
 function togglePw() {
@@ -1166,11 +974,8 @@ function togglePw() {
   else { input.type = 'password'; btn.textContent = '👁'; }
 }
 
-// ══════════════════════════════
-// RENDER RESULT
-// ══════════════════════════════
+/* ── Render ── */
 function renderResult(r) {
-  // ── Attribution banner ──
   const banner = document.getElementById('attrBanner');
   const hasAttr = r.attribution && r.attribution !== 'null' && r.attribution !== null;
   const historical = isHistorical(r);
@@ -1178,11 +983,7 @@ function renderResult(r) {
   if (hasAttr || historical) {
     banner.classList.add('visible');
     document.getElementById('attrSourceType').textContent = r.sourceType || 'Historical Work';
-
-    // Update icon
-    const iconEl = banner.querySelector('.attr-icon');
-    iconEl.textContent = sourceIcon(r.sourceType);
-
+    banner.querySelector('.attr-icon').textContent = sourceIcon(r.sourceType);
     if (hasAttr) {
       const parsed = parseAttribution(r.attribution);
       document.getElementById('attrMasterName').textContent = parsed.master || r.attribution;
@@ -1193,30 +994,22 @@ function renderResult(r) {
       document.getElementById('attrWorkName').textContent = '';
       document.getElementById('attrWorkName').style.display = 'none';
     }
-
-    // Contextual note
     const noteEl = document.getElementById('attrNote');
     if (hasAttr && (r.sourceType || '').toLowerCase().includes('stone')) {
       noteEl.textContent = 'Stone rubbing of a historical inscription. Scores reflect the mastery of the original calligrapher.';
     } else if (hasAttr) {
       noteEl.textContent = 'Identified as a historical masterwork. Scores reflect the quality of the original calligraphy.';
     } else {
-      noteEl.textContent = 'Historical or reproduced work detected. Attribution could not be confirmed.';
+      noteEl.textContent = 'Historical or reproduced work detected.';
     }
-  } else {
-    banner.classList.remove('visible');
-  }
+  } else { banner.classList.remove('visible'); }
 
-  // ── Score hero ──
   document.getElementById('scoreVal').textContent = r.overallScore;
   document.getElementById('scoreGrade').textContent = r.grade;
   document.getElementById('scoreStyle').textContent = r.detectedStyle;
   document.getElementById('scoreSummary').textContent = r.summary;
+  document.getElementById('scoreVal').style.color = r.overallScore >= 8 ? '#e0b835' : r.overallScore >= 6 ? '#c49a1a' : '#b83025';
 
-  const scoreEl = document.getElementById('scoreVal');
-  scoreEl.style.color = r.overallScore >= 8 ? '#e0b835' : r.overallScore >= 6 ? '#c49a1a' : '#b83025';
-
-  // ── Practitioner level badge ──
   const lb = document.getElementById('levelBadge');
   const level = r.practitionerLevel || '';
   lb.textContent = level;
@@ -1225,95 +1018,42 @@ function renderResult(r) {
   else if (level === 'Master') lb.classList.add('master');
   else if (level === 'Novice') lb.classList.add('novice');
 
-  // ── Dynamic section headings ──
-  const focusLabel = {
-    'Novice': 'Beginner Focus 入門重點',
-    'Beginner': 'Beginner Focus 初學重點',
-    'Early Intermediate': 'Intermediate Focus 中級重點',
-    'Solid Intermediate': 'Intermediate Focus 中級重點',
-    'Advanced': 'Advanced Focus 進階重點',
-    'Master': 'Master Refinement 精進重點',
-    'Grandmaster': 'Connoisseur Notes 鑑賞評注',
-  };
+  const focusLabel = { 'Novice':'Beginner Focus 入門重點','Beginner':'Beginner Focus 初學重點','Early Intermediate':'Intermediate Focus 中級重點','Solid Intermediate':'Intermediate Focus 中級重點','Advanced':'Advanced Focus 進階重點','Master':'Master Refinement 精進重點','Grandmaster':'Connoisseur Notes 鑑賞評注' };
   document.getElementById('focusHead').textContent = focusLabel[level] || 'Practice Focus 學習重點';
+  document.getElementById('imprHead').textContent = (level === 'Grandmaster' || level === 'Master') ? 'Connoisseur Observations 鑑賞要點' : 'Areas for Improvement 改進建議';
 
-  // Improvements heading: "Connoisseur Observations" for masterworks
-  const imprLabel = (level === 'Grandmaster' || level === 'Master')
-    ? 'Connoisseur Observations 鑑賞要點'
-    : 'Areas for Improvement 改進建議';
-  document.getElementById('imprHead').textContent = imprLabel;
-
-  // ── Metrics ──
-  const mg = document.getElementById('metricsGrid');
-  mg.innerHTML = '';
+  const mg = document.getElementById('metricsGrid'); mg.innerHTML = '';
   r.metrics.forEach(m => {
-    const pct = (m.score/10)*100;
-    mg.innerHTML += `
-      <div class="metric-card">
-        <div class="metric-row">
-          <span class="metric-name-cn">${m.cn}<span class="metric-name-en">${m.name}</span></span>
-          <span class="metric-val">${m.score}/10</span>
-        </div>
-        <div class="metric-bar"><div class="metric-fill" data-w="${pct}%"></div></div>
-        <p class="metric-note">${m.note}</p>
-      </div>`;
+    mg.innerHTML += `<div class="metric-card"><div class="metric-row"><span class="metric-name-cn">${m.cn}<span class="metric-name-en">${m.name}</span></span><span class="metric-val">${m.score}/10</span></div><div class="metric-bar"><div class="metric-fill" data-w="${(m.score/10)*100}%"></div></div><p class="metric-note">${m.note}</p></div>`;
   });
   requestAnimationFrame(()=>{ setTimeout(()=>{ document.querySelectorAll('.metric-fill').forEach(el=>el.style.width=el.dataset.w); },80); });
 
-  // ── Improvements ──
-  const il = document.getElementById('imprList');
-  il.innerHTML = '';
+  const il = document.getElementById('imprList'); il.innerHTML = '';
   r.improvements.forEach((imp,i) => {
-    il.innerHTML += `
-      <div class="impr-card">
-        <div class="impr-num">${i+1}</div>
-        <div>
-          <div class="impr-title">${imp.title}</div>
-          <div class="impr-desc">${imp.desc}</div>
-        </div>
-      </div>`;
+    il.innerHTML += `<div class="impr-card"><div class="impr-num">${i+1}</div><div><div class="impr-title">${imp.title}</div><div class="impr-desc">${imp.desc}</div></div></div>`;
   });
 
-  // ── Strengths ──
-  const sl = document.getElementById('strList');
-  sl.innerHTML = '';
+  const sl = document.getElementById('strList'); sl.innerHTML = '';
   r.strengths.forEach(s => { sl.innerHTML += `<span class="str-tag">✦ ${s}</span>`; });
 
-  // ── Intermediate focus ──
-  document.getElementById('tipsBox').innerHTML = `
-    <div class="tips-char">${r.intermediateChar||'功'}</div>
-    <p class="tips-inner">${r.intermediateFocus}</p>`;
+  document.getElementById('tipsBox').innerHTML = `<div class="tips-char">${r.intermediateChar||'功'}</div><p class="tips-inner">${r.intermediateFocus}</p>`;
 
-  // ── Study references ──
-  const rl = document.getElementById('refsList');
-  rl.innerHTML = '';
+  const rl = document.getElementById('refsList'); rl.innerHTML = '';
   (r.studyRefs||[]).forEach(ref => {
-    rl.innerHTML += `
-      <div class="ref-item">
-        <div class="ref-char">${ref.char}</div>
-        <div class="ref-body">
-          <div class="ref-name">${ref.name}</div>
-          <div class="ref-desc">${ref.reason}</div>
-        </div>
-        <span class="ref-badge">${ref.style}</span>
-      </div>`;
+    rl.innerHTML += `<div class="ref-item"><div class="ref-char">${ref.char}</div><div class="ref-body"><div class="ref-name">${ref.name}</div><div class="ref-desc">${ref.reason}</div></div><span class="ref-badge">${ref.style}</span></div>`;
   });
 }
 
-// ══════════════════════════════
-// HISTORY
-// ══════════════════════════════
+/* ── History ── */
 function saveToHistory(result) {
   const notes = document.getElementById('notesInput').value.trim();
-  const entry = {
+  history.unshift({
     id: Date.now(),
     date: new Date().toLocaleDateString('en-SG',{day:'2-digit',month:'short',year:'numeric'}),
     time: new Date().toLocaleTimeString('en-SG',{hour:'2-digit',minute:'2-digit'}),
     image: document.getElementById('previewImg').src,
-    result,
-    notes
-  };
-  history.unshift(entry);
+    result, notes
+  });
   if (history.length > 30) history = history.slice(0,30);
   localStorage.setItem('mopingHistory', JSON.stringify(history));
   updateHistCount();
@@ -1332,159 +1072,59 @@ function renderHistory() {
   const clearBtn = document.getElementById('clearHistBtn');
   const sub = document.getElementById('histSubtitle');
 
-  if (!history.length) {
-    empty.style.display = 'flex';
-    grid.style.display = 'none';
-    chartWrap.style.display = 'none';
-    clearBtn.style.display = 'none';
-    return;
-  }
+  if (!history.length) { empty.style.display='flex'; grid.style.display='none'; chartWrap.style.display='none'; clearBtn.style.display='none'; return; }
 
-  empty.style.display = 'none';
-  grid.style.display = 'grid';
-  chartWrap.style.display = 'block';
-  clearBtn.style.display = 'block';
-
+  empty.style.display='none'; grid.style.display='grid'; chartWrap.style.display='block'; clearBtn.style.display='block';
   const avg = (history.reduce((a,e)=>a+e.result.overallScore,0)/history.length).toFixed(1);
   const best = Math.max(...history.map(e=>e.result.overallScore));
   sub.textContent = `${history.length} session${history.length>1?'s':''} · Average ${avg} · Best ${best}`;
 
-  // Progress chart (last 10)
   const chartEntries = [...history].reverse().slice(-10);
-  const maxScore = 10;
-  const chart = document.getElementById('progressChart');
-  chart.innerHTML = '';
+  const chart = document.getElementById('progressChart'); chart.innerHTML = '';
   chartEntries.forEach((e,i) => {
-    const pct = (e.result.overallScore/maxScore)*100;
-    chart.innerHTML += `
-      <div class="chart-bar-wrap" style="animation-delay:${i*0.05}s">
-        <div class="chart-score-label">${e.result.overallScore}</div>
-        <div class="chart-bar" style="height:0%" data-h="${pct}%" title="${e.date}: ${e.result.overallScore}/10">
-          <div class="chart-tooltip">${e.date} · ${e.result.overallScore}/10</div>
-        </div>
-        <div class="chart-label">${e.date.split(' ')[0]} ${e.date.split(' ')[1]}</div>
-      </div>`;
+    const pct = (e.result.overallScore/10)*100;
+    chart.innerHTML += `<div class="chart-bar-wrap" style="animation-delay:${i*0.05}s"><div class="chart-score-label">${e.result.overallScore}</div><div class="chart-bar" style="height:0%" data-h="${pct}%" title="${e.date}: ${e.result.overallScore}/10"><div class="chart-tooltip">${e.date} · ${e.result.overallScore}/10</div></div><div class="chart-label">${e.date.split(' ')[0]} ${e.date.split(' ')[1]}</div></div>`;
   });
   requestAnimationFrame(()=>{ setTimeout(()=>{ document.querySelectorAll('.chart-bar').forEach(b=>b.style.height=b.dataset.h); },100); });
 
-  // Cards
   grid.innerHTML = '';
   history.forEach((e,idx) => {
     const r = e.result;
     const hasAttr = r.attribution && r.attribution !== 'null' && r.attribution !== null;
-
-    const metricHtml = r.metrics.slice(0,4).map(m=>`
-      <div class="mini-m">
-        <div class="mini-m-label">${m.cn}</div>
-        <div class="mini-m-bar"><div class="mini-m-fill" data-w="${(m.score/10)*100}%"></div></div>
-      </div>`).join('');
-
-    grid.innerHTML += `
-      <div class="history-card" style="animation-delay:${idx*0.05}s" onclick="openHistModal(${e.id})">
-        <img class="history-card-img" src="${e.image}" alt="">
-        <div class="history-card-body">
-          <div class="history-card-top">
-            <span class="history-card-date">${e.date} · ${e.time}</span>
-            <span class="history-card-score">${r.overallScore}/10</span>
-          </div>
-          <div class="history-card-grade">${r.grade}${r.practitionerLevel ? ` <span style="font-size:.7rem;color:var(--jade-lt);font-family:'Noto Sans SC',sans-serif;font-weight:400">· ${r.practitionerLevel}</span>` : ''}</div>
-          <span class="history-card-style">${r.detectedStyle}</span>
-          ${hasAttr ? `<span class="history-card-attr">${sourceIcon(r.sourceType)} ${r.attribution}</span>` : ''}
-          <p class="history-card-summary">${r.summary}</p>
-          ${e.notes ? `<p class="history-card-notes">📝 ${e.notes}</p>` : ''}
-          <div class="mini-metrics">${metricHtml}</div>
-          <div class="history-card-actions">
-            <button class="btn-ghost" onclick="event.stopPropagation();deleteEntry(${e.id})">Delete</button>
-          </div>
-        </div>
-      </div>`;
+    const metricHtml = r.metrics.slice(0,4).map(m=>`<div class="mini-m"><div class="mini-m-label">${m.cn}</div><div class="mini-m-bar"><div class="mini-m-fill" data-w="${(m.score/10)*100}%"></div></div></div>`).join('');
+    grid.innerHTML += `<div class="history-card" style="animation-delay:${idx*0.05}s" onclick="openHistModal(${e.id})"><img class="history-card-img" src="${e.image}" alt=""><div class="history-card-body"><div class="history-card-top"><span class="history-card-date">${e.date} · ${e.time}</span><span class="history-card-score">${r.overallScore}/10</span></div><div class="history-card-grade">${r.grade}${r.practitionerLevel ? ` <span style="font-size:.7rem;color:var(--jade-lt);font-family:'Noto Sans SC',sans-serif;font-weight:400">· ${r.practitionerLevel}</span>` : ''}</div><span class="history-card-style">${r.detectedStyle}</span>${hasAttr ? `<span class="history-card-attr">${sourceIcon(r.sourceType)} ${r.attribution}</span>` : ''}<p class="history-card-summary">${r.summary}</p>${e.notes ? `<p class="history-card-notes">📝 ${e.notes}</p>` : ''}<div class="mini-metrics">${metricHtml}</div><div class="history-card-actions"><button class="btn-ghost" onclick="event.stopPropagation();deleteEntry(${e.id})">Delete</button></div></div></div>`;
   });
-
   requestAnimationFrame(()=>{ setTimeout(()=>{ document.querySelectorAll('.mini-m-fill').forEach(el=>el.style.width=el.dataset.w); },200); });
 }
 
-function deleteEntry(id) {
-  history = history.filter(e=>e.id!==id);
-  localStorage.setItem('mopingHistory',JSON.stringify(history));
-  updateHistCount();
-  renderHistory();
-}
+function deleteEntry(id) { history = history.filter(e=>e.id!==id); localStorage.setItem('mopingHistory',JSON.stringify(history)); updateHistCount(); renderHistory(); }
 
 function clearHistory() {
   if (!confirm('Clear all session history? This cannot be undone.')) return;
-  history = [];
-  localStorage.removeItem('mopingHistory');
-  updateHistCount();
-  renderHistory();
+  history = []; localStorage.removeItem('mopingHistory'); updateHistCount(); renderHistory();
 }
 
 function openHistModal(id) {
-  const e = history.find(x=>x.id===id);
-  if (!e) return;
+  const e = history.find(x=>x.id===id); if (!e) return;
   const r = e.result;
   const hasAttr = r.attribution && r.attribution !== 'null' && r.attribution !== null;
   const historical = isHistorical(r);
-
-  // Build attribution banner for modal
   let attrHtml = '';
   if (hasAttr || historical) {
     const parsed = hasAttr ? parseAttribution(r.attribution) : { master: null, work: null };
-    attrHtml = `
-      <div class="modal-attr-banner visible">
-        <div class="modal-attr-source">${sourceIcon(r.sourceType)} ${r.sourceType || 'Historical Work'}</div>
-        ${parsed.master ? `<div class="modal-attr-text">${parsed.master}${parsed.work ? ' — ' + parsed.work : ''}</div>` : ''}
-      </div>`;
+    attrHtml = `<div class="modal-attr-banner visible"><div class="modal-attr-source">${sourceIcon(r.sourceType)} ${r.sourceType || 'Historical Work'}</div>${parsed.master ? `<div class="modal-attr-text">${parsed.master}${parsed.work ? ' — ' + parsed.work : ''}</div>` : ''}</div>`;
   }
-
-  const metricsHtml = r.metrics.map(m=>`
-    <div class="metric-card" style="margin-bottom:.5rem">
-      <div class="metric-row">
-        <span class="metric-name-cn">${m.cn} <span class="metric-name-en">${m.name}</span></span>
-        <span class="metric-val">${m.score}/10</span>
-      </div>
-      <div class="metric-bar"><div class="metric-fill" style="width:${(m.score/10)*100}%"></div></div>
-      <p class="metric-note">${m.note}</p>
-    </div>`).join('');
-
-  const imprsHtml = r.improvements.map((imp,i)=>`
-    <div class="impr-card" style="margin-bottom:.5rem">
-      <div class="impr-num">${i+1}</div>
-      <div><div class="impr-title">${imp.title}</div><div class="impr-desc">${imp.desc}</div></div>
-    </div>`).join('');
-
+  const metricsHtml = r.metrics.map(m=>`<div class="metric-card" style="margin-bottom:.5rem"><div class="metric-row"><span class="metric-name-cn">${m.cn} <span class="metric-name-en">${m.name}</span></span><span class="metric-val">${m.score}/10</span></div><div class="metric-bar"><div class="metric-fill" style="width:${(m.score/10)*100}%"></div></div><p class="metric-note">${m.note}</p></div>`).join('');
+  const imprsHtml = r.improvements.map((imp,i)=>`<div class="impr-card" style="margin-bottom:.5rem"><div class="impr-num">${i+1}</div><div><div class="impr-title">${imp.title}</div><div class="impr-desc">${imp.desc}</div></div></div>`).join('');
   const level = r.practitionerLevel || '';
-  const imprLabel = (level === 'Grandmaster' || level === 'Master')
-    ? 'Connoisseur Observations'
-    : 'Improvements';
+  const imprLabel = (level === 'Grandmaster' || level === 'Master') ? 'Connoisseur Observations' : 'Improvements';
 
-  document.getElementById('modalContent').innerHTML = `
-    <img class="modal-img" src="${e.image}" alt="">
-    ${attrHtml}
-    <div class="modal-score-row">
-      <span class="modal-score-big">${r.overallScore}/10</span>
-      <span class="modal-grade">${r.grade}</span>
-      <span class="score-style">${r.detectedStyle}</span>
-      ${level ? `<span class="level-badge${level==='Grandmaster'?' grandmaster':level==='Master'?' master':level==='Novice'?' novice':''}">${level}</span>` : ''}
-    </div>
-    <p class="score-summary" style="margin-bottom:1.5rem">${r.summary}</p>
-    ${e.notes ? `<p style="font-size:.78rem;color:var(--jade-lt);font-style:italic;margin-bottom:1.2rem">📝 ${e.notes}</p>` : ''}
-    <p class="sec-head">Metrics</p>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1.2rem">${metricsHtml}</div>
-    <p class="sec-head">${imprLabel}</p>
-    ${imprsHtml}
-    <p class="sec-head" style="margin-top:1rem">Strengths</p>
-    <div class="str-list">${r.strengths.map(s=>`<span class="str-tag">✦ ${s}</span>`).join('')}</div>
-    <p style="font-size:.7rem;color:var(--text-mute);margin-top:1.5rem;text-align:right">${e.date} · ${e.time}</p>`;
-
+  document.getElementById('modalContent').innerHTML = `<img class="modal-img" src="${e.image}" alt="">${attrHtml}<div class="modal-score-row"><span class="modal-score-big">${r.overallScore}/10</span><span class="modal-grade">${r.grade}</span><span class="score-style">${r.detectedStyle}</span>${level ? `<span class="level-badge${level==='Grandmaster'?' grandmaster':level==='Master'?' master':level==='Novice'?' novice':''}">${level}</span>` : ''}</div><p class="score-summary" style="margin-bottom:1.5rem">${r.summary}</p>${e.notes ? `<p style="font-size:.78rem;color:var(--jade-lt);font-style:italic;margin-bottom:1.2rem">📝 ${e.notes}</p>` : ''}<p class="sec-head">Metrics</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1.2rem">${metricsHtml}</div><p class="sec-head">${imprLabel}</p>${imprsHtml}<p class="sec-head" style="margin-top:1rem">Strengths</p><div class="str-list">${r.strengths.map(s=>`<span class="str-tag">✦ ${s}</span>`).join('')}</div><p style="font-size:.7rem;color:var(--text-mute);margin-top:1.5rem;text-align:right">${e.date} · ${e.time}</p>`;
   document.getElementById('modalOverlay').classList.add('open');
 }
 
-function closeModal(e) {
-  if (e.target === document.getElementById('modalOverlay'))
-    document.getElementById('modalOverlay').classList.remove('open');
-}
+function closeModal(e) { if (e.target === document.getElementById('modalOverlay')) document.getElementById('modalOverlay').classList.remove('open'); }
 
-// Init
 updateHistCount();
 setState('empty');
 </script>
