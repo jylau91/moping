@@ -405,6 +405,18 @@ nav {
   background: rgba(176,125,42,0.08);
 }
 .score-summary { font-size:.95rem; color:var(--text-mid); line-height:1.75; }
+.level-badge {
+  display:inline-flex; align-items:center; gap:.4rem;
+  margin-bottom:.7rem; margin-left:.5rem;
+  padding:.18rem .65rem;
+  font-size:.72rem; letter-spacing:.1em; border-radius:20px;
+  font-family:'Noto Sans SC',sans-serif;
+  border:1px solid var(--border-mid);
+  background: rgba(46,107,74,0.08);
+  color: var(--jade-lt);
+}
+.level-badge.master { border-color:rgba(176,125,42,0.5); background:rgba(176,125,42,0.1); color:var(--gold); }
+.level-badge.novice { border-color:rgba(192,57,43,0.3); background:rgba(192,57,43,0.06); color:var(--vermillion); }
 
 /* Section heading */
 .sec-head {
@@ -705,7 +717,7 @@ nav {
     <div class="brand-seal">墨</div>
     <div class="brand-text">
       <span class="brand-en">Mòpíng</span>
-      <span class="brand-sub">Calligraphy Analyser · Intermediate</span>
+      <span class="brand-sub">Calligraphy Analyser · All Levels</span>
     </div>
   </div>
   <div class="nav-tabs">
@@ -807,7 +819,10 @@ nav {
         </div>
         <div class="score-info">
           <div class="score-grade" id="scoreGrade">—</div>
-          <span class="score-style" id="scoreStyle">—</span>
+          <div style="display:flex;align-items:center;flex-wrap:wrap;gap:.3rem;margin-bottom:.7rem">
+            <span class="score-style" id="scoreStyle" style="margin-bottom:0">—</span>
+            <span class="level-badge" id="levelBadge">—</span>
+          </div>
           <p class="score-summary" id="scoreSummary">—</p>
         </div>
       </div>
@@ -821,7 +836,7 @@ nav {
       <p class="sec-head">Identified Strengths 優點</p>
       <div class="str-list" id="strList"></div>
 
-      <p class="sec-head">Intermediate Focus 中級學習重點</p>
+      <p class="sec-head">Intermediate Focus 學習重點</p>
       <div class="tips-box" id="tipsBox"></div>
 
       <p class="sec-head">Recommended Study 推薦參考</p>
@@ -918,7 +933,7 @@ function loadFile(file) {
     const img = new Image();
     img.onload = () => {
       // Resize: cap longest side at 1000px
-      const MAX = 1000;
+      const MAX = 600;
       let w = img.width, h = img.height;
       if (w > MAX || h > MAX) {
         if (w >= h) { h = Math.round(h * MAX / w); w = MAX; }
@@ -1042,6 +1057,27 @@ function renderResult(r) {
 
   const scoreEl = document.getElementById('scoreVal');
   scoreEl.style.color = r.overallScore >= 8 ? '#e0b835' : r.overallScore >= 6 ? '#c49a1a' : '#b83025';
+
+  // Practitioner level badge
+  const lb = document.getElementById('levelBadge');
+  const level = r.practitionerLevel || '';
+  lb.textContent = level;
+  lb.className = 'level-badge';
+  if (['Master','Grandmaster'].includes(level)) lb.classList.add('master');
+  else if (['Novice'].includes(level)) lb.classList.add('novice');
+
+  // Update focus section heading dynamically
+  const focusLabel = {
+    'Novice': 'Beginner Focus 入門重點',
+    'Beginner': 'Beginner Focus 初學重點',
+    'Early Intermediate': 'Intermediate Focus 中級重點',
+    'Solid Intermediate': 'Intermediate Focus 中級重點',
+    'Advanced': 'Advanced Focus 進階重點',
+    'Master': 'Master Refinement 精進重點',
+    'Grandmaster': 'Connoisseur Notes 鑑賞評注',
+  };
+  document.querySelector('[id="tipsBox"]').previousElementSibling.textContent =
+    (focusLabel[level] || 'Practice Focus 學習重點');
 
   // Metrics
   const mg = document.getElementById('metricsGrid');
@@ -1184,7 +1220,7 @@ function renderHistory() {
             <span class="history-card-date">${e.date} · ${e.time}</span>
             <span class="history-card-score">${e.result.overallScore}/10</span>
           </div>
-          <div class="history-card-grade">${e.result.grade}</div>
+          <div class="history-card-grade">${e.result.grade}${e.result.practitionerLevel ? ` <span style="font-size:.7rem;color:var(--jade-lt);font-family:'Noto Sans SC',sans-serif;font-weight:400">· ${e.result.practitionerLevel}</span>` : ''}</div>
           <span class="history-card-style">${e.result.detectedStyle}</span>
           <p class="history-card-summary">${e.result.summary}</p>
           ${e.notes ? `<p class="history-card-notes">📝 ${e.notes}</p>` : ''}
@@ -1241,6 +1277,7 @@ function openHistModal(id) {
       <span class="modal-score-big">${r.overallScore}/10</span>
       <span class="modal-grade">${r.grade}</span>
       <span class="score-style">${r.detectedStyle}</span>
+      ${r.practitionerLevel ? `<span class="level-badge${['Master','Grandmaster'].includes(r.practitionerLevel)?' master':['Novice'].includes(r.practitionerLevel)?' novice':''}">${r.practitionerLevel}</span>` : ''}
     </div>
     <p class="score-summary" style="margin-bottom:1.5rem">${r.summary}</p>
     ${e.notes ? `<p style="font-size:.78rem;color:var(--jade-lt);font-style:italic;margin-bottom:1.2rem">📝 ${e.notes}</p>` : ''}
