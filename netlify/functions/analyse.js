@@ -1,11 +1,13 @@
+const sharp = require('sharp');
+
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
-  const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-  if (!OPENAI_API_KEY) {
-    return { statusCode: 500, body: JSON.stringify({ error: 'OpenAI API key not configured.' }) };
+  const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
+  if (!ANTHROPIC_API_KEY) {
+    return { statusCode: 500, body: JSON.stringify({ error: 'Anthropic API key not configured.' }) };
   }
 
   const MOPING_PASSWORD = process.env.MOPING_PASSWORD;
@@ -55,28 +57,37 @@ The JSON must have exactly these fields:
 - studyRefs: an array of exactly 3 objects, each with: char (single Chinese character), name (master and work title), style (style name), reason (string under 15 words)`;
 
   try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    // ── Resize image server-side to max 600px longest side ─────────────────
+    const inputBuffer = Buffer.from(imageBase64, 'base64');
+    const resizedBuffer = await sharp(inputBuffer)
+      .resize(600, 600, { fit: 'inside', withoutEnlargement: true })
+      .jpeg({ quality: 85 })
+      .toBuffer();
+
+    const finalBase64 = resizedBuffer.toString('base64');
+
+    // ── Call Anthropic ─────────────────────────────────────────────────────
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${OPENAI_API_KEY}`
+        'x-api-key': ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        max_tokens: 2000,
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1500,
+        system: systemPrompt,
         messages: [
-          {
-            role: 'system',
-            content: systemPrompt
-          },
           {
             role: 'user',
             content: [
               {
-                type: 'image_url',
-                image_url: {
-                  url: `data:${mediaType};base64,${imageBase64}`,
-                  detail: 'high'
+                type: 'image',
+                source: {
+                  type: 'base64',
+                  media_type: 'image/jpeg',
+                  data: finalBase64
                 }
               },
               {
@@ -94,11 +105,11 @@ The JSON must have exactly these fields:
     if (!response.ok) {
       return {
         statusCode: response.status,
-        body: JSON.stringify({ error: data.error?.message || 'OpenAI API error', details: data.error || data })
+        body: JSON.stringify({ error: data.error?.message || 'Anthropic API error', details: data.error || data })
       };
     }
 
-    const raw = data.choices?.[0]?.message?.content || '';
+    const raw = data.content?.[0]?.text || '';
     const clean = raw.replace(/```json\n?|```/g, '').trim();
 
     JSON.parse(clean); // validate JSON
