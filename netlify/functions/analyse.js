@@ -72,7 +72,7 @@ The JSON must have exactly these fields:
       },
       body: JSON.stringify({
         model: 'gpt-5-mini',
-        max_tokens: 1500,
+        max_completion_tokens: 1500,
         messages: [
           {
             role: 'system',
