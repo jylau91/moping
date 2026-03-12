@@ -3,11 +3,11 @@ exports.handler = async (event) => {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
-  const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
-  if (!ANTHROPIC_API_KEY) {
+  const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+  if (!OPENAI_API_KEY) {
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: 'API key not configured. Set ANTHROPIC_API_KEY in environment variables.' })
+      body: JSON.stringify({ error: 'OpenAI API key not configured. Set OPENAI_API_KEY in environment variables.' })
     };
   }
 
@@ -64,24 +64,37 @@ The JSON must have exactly these fields:
 - studyRefs: an array of exactly 3 objects, each with: char (single Chinese character), name (master and work title), style (style name), reason (string under 15 words)`;
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01'
+        'Authorization': `Bearer ${OPENAI_API_KEY}`
       },
       body: JSON.stringify({
-        model: 'claude-haiku-4-5',
+        model: 'gpt-5-mini',
         max_tokens: 1500,
-        system: systemPrompt,
-        messages: [{
-          role: 'user',
-          content: [
-            { type: 'image', source: { type: 'base64', media_type: mediaType, data: imageBase64 } },
-            { type: 'text', text: `Analyse this Chinese calligraphy for an intermediate student. ${styleHint} Return only the JSON object.` }
-          ]
-        }]
+        messages: [
+          {
+            role: 'system',
+            content: systemPrompt
+          },
+          {
+            role: 'user',
+            content: [
+              {
+                type: 'image_url',
+                image_url: {
+                  url: `data:${mediaType};base64,${imageBase64}`,
+                  detail: 'low'
+                }
+              },
+              {
+                type: 'text',
+                text: `Analyse this Chinese calligraphy for an intermediate student. ${styleHint} Return only the JSON object.`
+              }
+            ]
+          }
+        ]
       })
     });
 
@@ -90,11 +103,11 @@ The JSON must have exactly these fields:
     if (!response.ok) {
       return {
         statusCode: response.status,
-        body: JSON.stringify({ error: data.error?.message || 'Anthropic API error' })
+        body: JSON.stringify({ error: data.error?.message || 'OpenAI API error' })
       };
     }
 
-    const raw = data.content?.find(b => b.type === 'text')?.text || '';
+    const raw = data.choices?.[0]?.message?.content || '';
     const clean = raw.replace(/```json\n?|```/g, '').trim();
 
     JSON.parse(clean);
