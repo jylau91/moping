@@ -1,6 +1,3 @@
-let sharp;
-try { sharp = require('sharp'); } catch (e) { sharp = null; }
-
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
 // ══════════════════════════════
@@ -205,20 +202,9 @@ exports.handler = async (event) => {
     : 'Auto-detect the calligraphy style.';
 
   try {
-    // ── Resize image ───────────────────────────────────────────────────────
-    let finalBase64 = imageBase64;
-    if (sharp) {
-      try {
-        const inputBuffer = Buffer.from(imageBase64, 'base64');
-        const resizedBuffer = await sharp(inputBuffer)
-          .resize(800, 800, { fit: 'inside', withoutEnlargement: true })
-          .jpeg({ quality: 85 })
-          .toBuffer();
-        finalBase64 = resizedBuffer.toString('base64');
-      } catch (resizeErr) {
-        console.error('sharp resize failed, using original:', resizeErr.message);
-      }
-    }
+    // Note: Image resizing is handled client-side (canvas 800px cap).
+    // No server-side sharp dependency needed.
+    const finalBase64 = imageBase64;
 
     // ── Build initial messages ─────────────────────────────────────────────
     const userMsg = `Analyse this Chinese calligraphy image. ${styleHint}
@@ -279,7 +265,6 @@ Your classification determines the scoring range. Return only the JSON object.`;
     if (!validation.valid) {
       console.log('Score validation failed, requesting correction:', validation.reason);
 
-      // Build correction conversation: include the original response and ask for fix
       const correctionMessages = [
         ...messages,
         {
@@ -308,7 +293,6 @@ Return ONLY the corrected JSON object.`
 
         try {
           const corrParsed = JSON.parse(corrClean);
-          // Use corrected version if it actually improved
           if (corrParsed.overallScore && corrParsed.metrics) {
             parsed = corrParsed;
             clean = corrClean;
