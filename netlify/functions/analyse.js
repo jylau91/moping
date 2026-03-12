@@ -73,7 +73,6 @@ The JSON must have exactly these fields:
       },
       body: JSON.stringify({
         model: 'gpt-5-mini',
-        max_output_tokens: 2000,
         instructions: systemPrompt,
         input: [
           {
